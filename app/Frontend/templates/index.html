@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Difficulty</title>
+</head>
+<body>
+    <h1>Select Difficulty</h1>
+    <form action="{{ url_for('generate_sudoku') }}" method="POST">
+        <label for="difficulty">Difficulty:</label><br>
+        <select id="difficulty" name="difficulty">
+            <option value="easy">Easy</option>
+            <option value="medium">Medium</option>
+            <option value="hard">Hard</option>
+        </select><br>
+        <input type="submit" value="Generate Sudoku">
+    </form>
+</body>
+</html>
