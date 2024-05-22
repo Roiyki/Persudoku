@@ -1,20 +1,11 @@
-# Use an appropriate base image for your frontend. Assuming a simple static site.
-FROM node:14-alpine as build
+# Use the official Nginx image from the Docker Hub
+FROM nginx:alpine
 
-# Set the working directory
-WORKDIR /app
+# Copy the frontend static files into the appropriate directory
+COPY ./app/Frontend/templates /usr/share/nginx/html
 
-# Copy package.json and install dependencies
-COPY package.json ./
-RUN npm install
+# Expose port 80
+EXPOSE 80
 
-# Copy the rest of the application code and build
-COPY . .
-RUN npm run build
-
-# Serve the frontend using a simple server like serve
-FROM node:14-alpine
-RUN npm install -g serve
-COPY --from=build /app/build /app
-EXPOSE 5000
-CMD ["serve", "-s", "/app", "-l", "5000"]
+# Start Nginx
+CMD ["nginx", "-g", "daemon off;"]
