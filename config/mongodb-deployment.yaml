@@ -1,10 +1,11 @@
 # mongodb-deployment.yaml
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
-  name: mongodb-deployment
-  namespace: Database
+  name: mongodb-statefulset
+  namespace: database
 spec:
+  serviceName: "mongodb"
   replicas: 1
   selector:
     matchLabels:
@@ -24,11 +25,11 @@ spec:
           mountPath: /data/db
         resources:
           requests:
-            memory: "256Mi"  # Adjust memory request based on your workload
-            cpu: "100m"      # Adjust CPU request based on your workload
+            memory: "256Mi"
+            cpu: "100m"
           limits:
-            memory: "512Mi"  # Adjust memory limit based on your workload
-            cpu: "500m"      # Adjust CPU limit based on your workload
+            memory: "512Mi"
+            cpu: "500m"
   volumeClaimTemplates:
   - metadata:
       name: mongodb-data
@@ -37,3 +38,4 @@ spec:
       resources:
         requests:
           storage: 1Gi
+
