@@ -3,6 +3,7 @@ from flask_pymongo import PyMongo
 from pymongo import MongoClient
 import random
 import os
+from urllib.parse import quote
 
 # Set the path to the template folder
 template_folder = os.path.abspath(os.path.join(os.path.dirname(__file__), "../Frontend/templates"))
@@ -11,7 +12,7 @@ print("Template Folder:", template_folder)
 # Initialize the Flask app with the correct template folder
 app = Flask(__name__, template_folder=template_folder)
 
-app.config['MONGO_URI'] = "mongodb://localhost:27017/mydatabase"
+app.config['MONGO_URI'] = "mongodb://mongodb-service.mongodb-namespace.svc.cluster.local:27017/mydatabase"
 mongo = PyMongo(app)
 
 # Initialize the global grid and other variables
@@ -203,4 +204,4 @@ def test_db_connection():
         return f"An error occurred while connecting to the MongoDB database: {e}"
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000)
