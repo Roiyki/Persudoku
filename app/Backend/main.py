@@ -12,7 +12,8 @@ print("Template Folder:", template_folder)
 # Initialize the Flask app with the correct template folder
 app = Flask(__name__, template_folder=template_folder)
 
-app.config['MONGO_URI'] = "mongodb://mongodb-service.mongodb-namespace.svc.cluster.local:27017/mydatabase"
+app.config['MONGO_URI'] = "mongodb://Database.mongodb-namespace.svc.cluster.local:27017/mydatabase"
+
 mongo = PyMongo(app)
 
 # Initialize the global grid and other variables
