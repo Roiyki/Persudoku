@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: flask-backend
-        image: yourdockerhubusername/persudoku-backend:latest  # Update with your Flask backend image
+        image: roiyki/persudoku-backend:latest  # Update with your Flask backend image
         ports:
         - containerPort: 5000
         resources:
@@ -26,7 +26,7 @@ spec:
             memory: "512Mi"  # Adjust memory limit based on your workload
             cpu: "500m"      # Adjust CPU limit based on your workload
       - name: nginx-frontend
-        image: yourdockerhubusername/persudoku-frontend:latest  # Update with your Nginx frontend image
+        image: roiyki/persudoku-frontend:latest  # Update with your Nginx frontend image
         ports:
         - containerPort: 80
         resources:
