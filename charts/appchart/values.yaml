@@ -1,0 +1,42 @@
+replicaCount:
+  backend: 1
+  frontend: 1
+  mongodb: 1
+
+backend:
+  image:
+    repository: roiyki/persudoku-backend:latest
+    pullPolicy: IfNotPresent
+    tag: "latest"
+  service:
+    type: ClusterIP
+    port: 5000
+
+frontend:
+  image:
+    repository: roiyki/persudoku-frontend:latest
+    pullPolicy: IfNotPresent
+    tag: "latest"
+  service:
+    type: ClusterIP
+    port: 80
+
+mongodb:
+  image:
+    repository: mongo:latest
+    pullPolicy: IfNotPresent
+    tag: "latest"
+  persistence:
+    enabled: true
+    existingClaim: ""
+    accessMode: ReadWriteOnce
+    size: 1Gi
+
+ingress:
+  enabled: false
+  # Add your ingress configuration if needed
+
+resources: {}
+  # Add resources configuration if needed
+
+# Add other configurations as needed
