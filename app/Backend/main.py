@@ -109,15 +109,19 @@ def login():
         try:
             email = request.form["email"]
             password = request.form["password"]
+            print("Received email:", email)
+            print("Received password:", password)
             
             user = users_collection.find_one({"email": email})
-            
             if user and user["password"] == password:
+                print("User found and password matched")
                 # Redirect to index.html after successful login
                 return redirect(url_for('index'))  
             else:
+                print("Invalid credentials")
                 return jsonify({"message": "Invalid credentials"}), 401
         except Exception as e:
+            print("Error occurred during login:", e)
             return jsonify({"message": f"Error occurred during login: {str(e)}"}), 500
     return render_template("login.html")
 
