@@ -84,6 +84,7 @@ def remove_cells(n):
             count -= 1
 
 # Access the database within the app context
+@app.before_first_request
 def setup_database():
     global users_collection
     users_collection = mongo.db.users
