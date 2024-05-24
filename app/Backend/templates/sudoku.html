@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sudoku Puzzle</title>
+    <style>
+        table {
+            border-collapse: collapse;
+        }
+        td {
+            width: 30px;
+            height: 30px;
+            border: 1px solid black;
+            text-align: center;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        /* Bold borders for 3x3 square separation */
+        td:nth-child(3n+1) {
+            border-left: 2px solid black;
+        }
+        tr:nth-child(3n+1) td {
+            border-top: 2px solid black;
+        }
+        td:nth-child(3n) {
+            border-right: 2px solid black;
+        }
+        tr:nth-child(3n) td {
+            border-bottom: 2px solid black;
+        }
+        .highlight {
+            background-color: lightgray;
+        }
+        .correct {
+            background-color: lightgreen;
+        }
+        .incorrect {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>Sudoku Puzzle</h1>
+    <p id="message"></p>
+    <p>Attempts left: <span id="attempts-left">{{ attempts_left }}</span></p>
+    <p>Time left: <span id="time-left">--:--</span></p>
+    <table>
+        {% for row in range(9) %}
+        <tr>
+            {% for col in range(9) %}
+            <td id="cell-{{ row }}-{{ col }}" onclick="selectCell({{ row }}, {{ col }})">
+                {{ '' if grid[row][col] == 0 else grid[row][col] }}
+            </td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+    <input type="number" id="selected-number" min="1" max="9">
+    <button onclick="placeNumber()">Place Number</button>
+    <script>
+        let selectedCell = null;
+        let timerDuration = 0;
+        let timerInterval = null;
+        let timerStarted = false;
+
+        function startTimer(duration) {
+            let timerDisplay = document.getElementById('time-left');
+            let timer = duration * 60; // Convert minutes to seconds
+            timerInterval = setInterval(function() {
+                let minutes = Math.floor(timer / 60);
+                let seconds = timer % 60;
+
+                timerDisplay.textContent = minutes.toString().padStart(2, '0') + ':' + seconds.toString().padStart(2, '0');
+
+                if (--timer < 0) {
+                    clearInterval(timerInterval);
+                    timerDisplay.textContent = 'Time\'s up!';
+                    document.getElementById("message").innerText = "Time's up! Game over.";
+                    document.getElementById("attempts-left").innerText = "0"; // Set attempts left to 0
+                    document.querySelectorAll('td').forEach(cell => cell.onclick = null);
+                }
+            }, 1000);
+        }
+
+        function clearHighlights() {
+            const cells = document.querySelectorAll('td');
+            cells.forEach(cell => cell.classList.remove('highlight'));
+        }
+
+        function highlightCell(row, col) {
+            const table = document.querySelector('table');
+            for (let i = 0; i < 9; i++) {
+                // Highlight row and column
+                table.rows[row].cells[i].classList.add('highlight');
+                table.rows[i].cells[col].classList.add('highlight');
+            }
+
+            // Highlight the 3x3 square
+            const startRow = Math.floor(row / 3) * 3;
+            const startCol = Math.floor(col / 3) * 3;
+            for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 3; j++) {
+                    table.rows[startRow + i].cells[startCol + j].classList.add('highlight');
+                }
+            }
+        }
+
+        function selectCell(row, col) {
+            if (document.getElementById("attempts-left").innerText === "0") {
+                document.getElementById("message").innerText = "Game over! No attempts left.";
+                return;
+            }
+            if (!timerStarted) {
+                timerStarted = true;
+                const difficulty = "{{ difficulty }}"; // Get difficulty from Flask template
+                if (difficulty === 'easy') {
+                    timerDuration = 30;
+                } else if (difficulty === 'medium') {
+                    timerDuration = 20;
+                } else if (difficulty === 'hard') {
+                    timerDuration = 10;
+                }
+                startTimer(timerDuration);
+            }
+            clearHighlights();
+            selectedCell = {
+                row,
+                col
+            };
+            highlightCell(row, col);
+            document.getElementById("message").innerText = `Selected cell: (${row}, ${col})`;
+        }
+
+        function placeNumber() {
+            const selectedNumber = document.getElementById("selected-number").value;
+            if (!selectedCell) {
+                document.getElementById("message").innerText = "Please select a cell first.";
+                return;
+            }
+
+            const cellIndex = selectedCell.row * 9 + selectedCell.col;
+            fetch('/place-number', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    'selected_number': selectedNumber,
+                    'cell_index': cellIndex,
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("message").innerText = data.message;
+                if (data.status === 'success') {
+                    const cell = document.getElementById(`cell-${selectedCell.row}-${selectedCell.col}`);
+                    cell.innerText = selectedNumber;
+                    cell.classList.remove('incorrect'); // Remove incorrect class if present
+                    cell.classList.add('correct'); // Add correct class
+                    document.getElementById("selected-number").value = ''; // Clear input field
+                    selectedCell = null;
+                }
+                if (data.status === 'win') {
+                    document.getElementById("message").innerText = "Congratulations! You solved the puzzle!";
+                    document.querySelectorAll('td').forEach(cell => cell.onclick = null);
+                }
+                if (data.status === 'error') {
+                    document.getElementById("attempts-left").innerText = parseInt(document.getElementById("attempts-left").innerText) - 1;
+                    if (document.getElementById("attempts-left").innerText === "0") {
+                        document.getElementById("message").innerText = "Game over! No attempts left.";
+                        document.querySelectorAll('td').forEach(cell => cell.onclick = null);
+                    } else {
+                        const cell = document.getElementById(`cell-${selectedCell.row}-${selectedCell.col}`);
+                        cell.textContent = selectedNumber;
+                        cell.classList.add('incorrect');
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
+
