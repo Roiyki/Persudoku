@@ -7,16 +7,43 @@
 </head>
 <body>
     <h1>Login</h1>
-    <form action="{{ url_for('login') }}" method="post">
+    <form id="login-form" action="{{ url_for('login') }}" method="post">
         <label for="email">Email:</label><br>
-        <input type="email" id="email" name="email" required><br>
+        <input type="email" id="email" name="email" autocomplete="email" required><br> <!-- Add autocomplete attribute -->
         <label for="password">Password:</label><br>
-        <input type="password" id="password" name="password" required><br>
+        <input type="password" id="password" name="password" autocomplete="current-password" required><br> <!-- Add autocomplete attribute -->
         <input type="submit" value="Login">
     </form>
     <p>{{ message }}</p>
     
     <!-- Add link to register page -->
     <p>Don't have an account yet? <a href="{{ url_for('register') }}">Register</a></p>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const loginForm = document.getElementById("login-form");
+
+            loginForm.addEventListener("submit", event => {
+                event.preventDefault(); // Prevent the default form submission
+
+                const formData = new FormData(loginForm);
+                fetch("/login", {
+                    method: "POST",
+                    body: formData
+                })
+                .then(response => {
+                    if (response.ok) {
+                        window.location.href = "/"; // Redirect to homepage on successful login
+                    } else {
+                        throw new Error("Invalid credentials");
+                    }
+                })
+                .catch(error => {
+                    console.error("Login error:", error);
+                    // Handle login error, such as displaying an error message to the user
+                });
+            });
+        });
+    </script>
 </body>
 </html>
