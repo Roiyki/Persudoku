@@ -13,7 +13,7 @@ app = Flask(__name__, template_folder=template_folder)
 # Update MongoDB URI to use the Docker service name
 app.config['MONGO_URI'] = os.environ.get('MONGO_URI', 'mongodb://mongodb:27017/sudoku_app')
 
-mongo = PyMongo(app)
+mongo = PyMongo(app)  # Initialize PyMongo instance
 
 # Initialize the global grid and other variables
 grid = [[0 for _ in range(9)] for _ in range(9)]
@@ -23,10 +23,7 @@ attempts_left = 3
 def possible(row, column, number):
     global grid
     for i in range(0, 9):
-        if grid[row][i] == number:
-            return False
-    for i in range(0, 9):
-        if grid[i][column] == number:
+        if grid[row][i] == number or grid[i][column] == number:
             return False
     x0 = (column // 3) * 3
     y0 = (row // 3) * 3
@@ -84,7 +81,6 @@ def remove_cells(n):
             count -= 1
 
 # Access the database within the app context
-@app.before_first_request
 def setup_database():
     global users_collection
     users_collection = mongo.db.users
@@ -117,14 +113,20 @@ def login():
             if user and user["password"] == password:
                 print("User found and password matched")
                 # Redirect to index.html after successful login
-                return redirect(url_for('index'))  
+                return jsonify({"redirect": url_for('index')})
             else:
                 print("Invalid credentials")
                 return jsonify({"message": "Invalid credentials"}), 401
         except Exception as e:
             print("Error occurred during login:", e)
             return jsonify({"message": f"Error occurred during login: {str(e)}"}), 500
-    return render_template("login.html")
+    elif request.method == "GET":
+        # Return the login form for GET requests
+        return render_template("login.html")
+    else:
+        return jsonify({"message": "Method not allowed"}), 405
+
+
 
 # Route to render the registration page and handle registration
 @app.route("/register", methods=["GET", "POST"])
@@ -154,7 +156,7 @@ def register():
         return render_template("register.html")
 
 # Route to generate a Sudoku puzzle
-@app.route("/generate_sudoku", methods=["POST"])
+@app.route("/api/generate_sudoku", methods=["POST"])
 def generate_sudoku():
     global grid, attempts_left
     difficulty = request.form.get("difficulty")
@@ -170,7 +172,14 @@ def generate_sudoku():
     generate_full_grid()
     remove_cells(difficulties[difficulty])
     attempts_left = 3
+    return jsonify({"redirect": url_for('sudoku', difficulty=difficulty)})
+
+
+@app.route("/sudoku")
+def sudoku():
+    difficulty = request.args.get('difficulty', 'medium')  # Default to medium if not provided
     return render_template("sudoku.html", grid=grid, attempts_left=attempts_left, difficulty=difficulty)
+
 
 
 # Route to place a number on the Sudoku grid
@@ -192,7 +201,7 @@ def place_number():
             grid[row][column] = selected_number
             if all(all(cell != 0 for cell in row) for row in grid):  
                 return jsonify({"message": "Congratulations! You solved the puzzle!", "correct": True})
-            return jsonify({"message": "Number placed successfully", "correct": True})
+            return jsonify({"message": "Number placed successfully",            "correct": True})
         else:
             attempts_left -= 1
             if attempts_left <= 0:
@@ -220,28 +229,6 @@ def not_found_error(error):
 @app.errorhandler(500)
 def internal_server_error(error):
     return jsonify({"error": "Internal Server Error", "message": "An unexpected error occurred on the server"}), 500
-
-# Close the MongoClient after the last request is handled
-@app.teardown_appcontext
-def teardown_appcontext(error=None):
-    if hasattr(app, 'mongo') and app.mongo.cx:
-        try:
-            app.mongo.cx.close()
-        except Exception as e:
-            app.logger.error(f"An error occurred while closing the MongoDB client connection: {e}")
-        finally:
-            del app.mongo
-
-@app.route("/test_db_connection", methods=["GET"])
-def test_db_connection():
-    try:
-        user = mongo.db.users.find_one()
-        if user:
-            return "Successfully connected to the MongoDB database and retrieved a document."
-        else:
-            return "Successfully connected to the MongoDB database, but no documents found."
-    except Exception as e:
-        return f"An error occurred while connecting to the MongoDB database: {e}"
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000)

@@ -5,13 +5,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sudoku Puzzle</title>
     <style>
-        /* Your CSS styles */
+        /* CSS styles for better appearance */
+        table {
+            border-collapse: collapse;
+            margin: 20px auto;
+            font-family: Arial, sans-serif;
+        }
+        td {
+            border: 1px solid black;
+            width: 40px;
+            height: 40px;
+            text-align: center;
+            vertical-align: middle;
+            font-size: 20px;
+        }
+        /* Thicker borders for 3x3 squares */
+        td:nth-child(3n+1) {
+            border-left-width: 2px;
+        }
+        td:nth-child(3n) {
+            border-right-width: 2px;
+        }
+        tr:nth-child(3n+1) td {
+            border-top-width: 2px;
+        }
+        tr:nth-child(3n) td {
+            border-bottom-width: 2px;
+        }
+        .highlight {
+            background-color: yellow;
+        }
+        .correct {
+            color: green;
+        }
+        .incorrect {
+            color: red;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        input, button {
+            margin-top: 10px;
+            font-size: 18px;
+        }
     </style>
 </head>
 <body>
     <h1>Sudoku Puzzle</h1>
     <p id="message"></p>
-    <p>Attempts left: <span id="attempts-left">{{ attempts_left }}</span></p>
+    <p>Attempts left: <span id="attempts-left">--</span></p>
     <p>Time left: <span id="time-left">--:--</span></p>
     <table id="sudoku-grid">
         <!-- Sudoku grid will be dynamically populated here -->
@@ -20,160 +64,148 @@
     <button onclick="placeNumber()">Place Number</button>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            // Function to fetch Sudoku grid from Flask API
-            function fetchSudokuGrid() {
-                fetch('/api/generate_sudoku', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: new URLSearchParams({
-                        'difficulty': '{{ difficulty }}', // Pass the selected difficulty from Flask template
-                    }),
-                })
-                .then(response => response.json())
-                .then(data => {
-                    // Populate Sudoku grid dynamically
-                    const grid = data.grid;
-                    const table = document.getElementById("sudoku-grid");
-                    grid.forEach((row, rowIndex) => {
-                        const tr = document.createElement("tr");
-                        row.forEach((cell, colIndex) => {
-                            const td = document.createElement("td");
-                            td.id = `cell-${rowIndex}-${colIndex}`;
-                            td.onclick = () => selectCell(rowIndex, colIndex);
-                            td.innerText = cell !== 0 ? cell : "";
-                            tr.appendChild(td);
-                        });
-                        table.appendChild(tr);
-                    });
-                    // Update attempts left
-                    document.getElementById("attempts-left").innerText = data.attempts_left;
-                })
-                .catch(error => console.error('Error fetching Sudoku grid:', error));
+            // Get JSON data passed from Flask template
+            const gridData = {{ grid | tojson }};
+            const attemptsLeft = {{ attempts_left }};
+            const difficulty = "{{ difficulty }}";
+
+            // Populate Sudoku grid dynamically
+            const table = document.getElementById("sudoku-grid");
+            gridData.forEach((row, rowIndex) => {
+                const tr = document.createElement("tr");
+                row.forEach((cell, colIndex) => {
+                    const td = document.createElement("td");
+                    td.id = `cell-${rowIndex}-${colIndex}`;
+                    td.onclick = () => selectCell(rowIndex, colIndex);
+                    td.innerText = cell !== 0 ? cell : "";
+                    tr.appendChild(td);
+                });
+                table.appendChild(tr);
+            });
+
+            // Update attempts left
+            document.getElementById("attempts-left").innerText = attemptsLeft.toString();
+
+            // Initialize timer variables
+            initializeTimer(difficulty);
+        });
+
+        let selectedCell = null;
+        let timerInterval = null;
+        let timerStarted = false;
+
+        function initializeTimer(difficulty) {
+            let timeLeft;
+            switch (difficulty) {
+                case 'easy':
+                    timeLeft = 15 * 60; // 15 minutes in seconds
+                    break;
+                case 'medium':
+                    timeLeft = 10 * 60; // 10 minutes in seconds
+                    break;
+                case 'hard':
+                    timeLeft = 7 * 60; // 7 minutes in seconds
+                    break;
+                default:
+                    timeLeft = 10 * 60; // Default to 10 minutes
             }
 
-            // Call fetchSudokuGrid function when the page loads
-            fetchSudokuGrid();
+            function updateTimer() {
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                document.getElementById("time-left").innerText = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                timeLeft--;
 
-            // Remaining JavaScript functions (startTimer, selectCell, placeNumber) remain unchanged
-
-            let selectedCell = null;
-            let timerDuration = 0;
-            let timerInterval = null;
-            let timerStarted = false;
-
-            function startTimer(duration) {
-                let timerDisplay = document.getElementById('time-left');
-                let timer = duration * 60; // Convert minutes to seconds
-                timerInterval = setInterval(function() {
-                    let minutes = Math.floor(timer / 60);
-                    let seconds = timer % 60;
-
-                    timerDisplay.textContent = minutes.toString().padStart(2, '0') + ':' + seconds.toString().padStart(2, '0');
-
-                    if (--timer < 0) {
-                        clearInterval(timerInterval);
-                        timerDisplay.textContent = 'Time\'s up!';
-                        document.getElementById("message").innerText = "Time's up! Game over.";
-                        document.getElementById("attempts-left").innerText = "0"; // Set attempts left to 0
-                        document.querySelectorAll('td').forEach(cell => cell.onclick = null);
-                    }
-                }, 1000);
-            }
-
-            function clearHighlights() {
-                const cells = document.querySelectorAll('td');
-                cells.forEach(cell => cell.classList.remove('highlight'));
-            }
-
-            function highlightCell(row, col) {
-                const table = document.querySelector('table');
-                for (let i = 0; i < 9; i++) {
-                    // Highlight row and column
-                    table.rows[row].cells[i].classList.add('highlight');
-                    table.rows[i].cells[col].classList.add('highlight');
-                }
-
-                // Highlight the 3x3 square
-                const startRow = Math.floor(row / 3) * 3;
-                const startCol = Math.floor(col / 3) * 3;
-                for (let i = 0; i < 3; i++) {
-                    for (let j = 0; j < 3; j++) {
-                        table.rows[startRow + i].cells[startCol + j].classList.add('highlight');
-                    }
+                if (timeLeft < 0) {
+                    document.getElementById("message").innerText = "Time's up! Game over.";
+                    document.querySelectorAll('td').forEach(cell => cell.onclick = null);
+                    clearInterval(timerInterval);
                 }
             }
 
-            function selectCell(row, col) {
-                if (document.getElementById("attempts-left").innerText === "0") {
-                    document.getElementById("message").innerText = "Game over! No attempts left.";
-                    return;
-                }
+            window.startTimer = function() {
                 if (!timerStarted) {
                     timerStarted = true;
-                    const difficulty = "{{ difficulty }}"; // Get difficulty from Flask template
-                    if (difficulty === 'easy') {
-                        timerDuration = 30;
-                    } else if (difficulty === 'medium') {
-                        timerDuration = 20;
-                    } else if (difficulty === 'hard') {
-                        timerDuration = 10;
-                    }
-                    startTimer(timerDuration);
+                    updateTimer(); // Initial call to display the timer immediately
+                    timerInterval = setInterval(updateTimer, 1000);
                 }
-                clearHighlights();
-                selectedCell = {
-                    row,
-                    col
-                };
-                highlightCell(row, col);
-                document.getElementById("message").innerText = `Selected cell: (${row}, ${col})`;
+            }
+        }
+
+        function clearHighlights() {
+            const cells = document.querySelectorAll('td');
+            cells.forEach(cell => cell.classList.remove('highlight'));
+        }
+
+        function highlightCell(row, col) {
+            const table = document.querySelector('table');
+            for (let i = 0; i < 9; i++) {
+                // Highlight row and column
+                table.rows[row].cells[i].classList.add('highlight');
+                table.rows[i].cells[col].classList.add('highlight');
             }
 
-            function placeNumber() {
-                const selectedNumber = document.getElementById("selected-number").value;
-                if (!selectedCell) {
-                    document.getElementById("message").innerText = "Please select a cell first.";
-                    return;
+            // Highlight the 3x3 square
+            const startRow = Math.floor(row / 3) * 3;
+            const startCol = Math.floor(col / 3) * 3;
+            for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 3; j++) {
+                    table.rows[startRow + i].cells[startCol + j].classList.add('highlight');
                 }
+            }
+        }
 
-                const cellIndex = selectedCell.row * 9 + selectedCell.col;
-                fetch('/api/place_number', { // Corrected the route
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: new URLSearchParams({
-                        'selected_number': selectedNumber,
-                        'cell_index': cellIndex,
-                    }),
-                })
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById("message").innerText = data.message;
-                    if (data.correct) { // Changed 'status' to 'correct'
+        function selectCell(row, col) {
+            clearHighlights();
+            selectedCell = { row, col };
+            highlightCell(row, col);
+            document.getElementById("message").innerText = `Selected cell: (${row}, ${col})`;
+        }
+
+        function placeNumber() {
+            const selectedNumber = document.getElementById("selected-number").value;
+            if (!selectedCell) {
+                document.getElementById("message").innerText = "Please select a cell first.";
+                return;
+            }
+
+            // Start the timer on the first placement
+            startTimer();
+
+            const cellIndex = selectedCell.row * 9 + selectedCell.col;
+            fetch('/api/place_number', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    'selected_number': selectedNumber,
+                    'cell_index': cellIndex,
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("message").innerText = data.message;
+                if (data.correct) {
+                    const cell = document.getElementById(`cell-${selectedCell.row}-${selectedCell.col}`);
+                    cell.innerText = selectedNumber;
+                    cell.classList.remove('incorrect'); // Remove incorrect class if present
+                    cell.classList.add('correct'); // Add correct class
+                    document.getElementById("selected-number").value = ''; // Clear input field
+                    selectedCell = null;
+                } else {
+                    document.getElementById("attempts-left").innerText = parseInt(document.getElementById("attempts-left").innerText) - 1;
+                    if (document.getElementById("attempts-left").innerText === "0") {
+                        document.getElementById("message").innerText = "Game over! No attempts left.";
+                        document.querySelectorAll('td').forEach(cell => cell.onclick = null);
+                    } else {
                         const cell = document.getElementById(`cell-${selectedCell.row}-${selectedCell.col}`);
-                        cell.innerText = selectedNumber;
-                        cell.classList.remove('incorrect'); // Remove incorrect class if present
-                        cell.classList.add('correct'); // Add correct class
-                        document.getElementById("selected-number").value = ''; // Clear input field
-                        selectedCell = null;
+                        cell.textContent = selectedNumber;
+                        cell.classList.add('incorrect');
                     }
-                    if (!data.correct) { // Changed 'status' to 'correct'
-                        document.getElementById("attempts-left").innerText = parseInt(document.getElementById("attempts-left").innerText) - 1;
-                        if (document.getElementById("attempts-left").innerText === "0") {
-                            document.getElementById("message").innerText = "Game over! No attempts left.";
-                            document.querySelectorAll('td').forEach(cell => cell.onclick = null);
-                        } else {
-                            const cell = document.getElementById(`cell-${selectedCell.row}-${selectedCell.col}`);
-                            cell.textContent = selectedNumber;
-                            cell.classList.add('incorrect');
-                        }
-                    }
-                });
-            }
-        });
+                }
+            });
+        }
     </script>
 </body>
 </html>

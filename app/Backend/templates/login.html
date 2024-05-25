@@ -14,7 +14,7 @@
         <input type="password" id="password" name="password" required autocomplete="off"><br>
         <input type="submit" value="Login">
     </form>
-    <p>{{ message }}</p>
+    <p id="message"></p>
     
     <!-- Add link to register page -->
     <p>Don't have an account yet? <a href="{{ url_for('register') }}">Register</a></p>
@@ -22,6 +22,7 @@
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             const loginForm = document.getElementById("login-form");
+            const messageElement = document.getElementById("message");
 
             loginForm.addEventListener("submit", event => {
                 event.preventDefault(); // Prevent the default form submission
@@ -31,16 +32,17 @@
                     method: "POST",
                     body: formData
                 })
-                .then(response => {
-                    if (response.ok) {
-                        window.location.href = "/"; // Redirect to homepage on successful login
+                .then(response => response.json())
+                .then(data => {
+                    if (data.redirect) {
+                        window.location.href = data.redirect; // Redirect to the index page on successful login
                     } else {
-                        throw new Error("Invalid credentials");
+                        messageElement.textContent = data.message; // Display the error message
                     }
                 })
                 .catch(error => {
                     console.error("Login error:", error);
-                    // Handle login error, such as displaying an error message to the user
+                    messageElement.textContent = "An error occurred during login. Please try again."; // Display a generic error message
                 });
             });
         });
