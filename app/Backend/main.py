@@ -86,7 +86,7 @@ def setup_database():
     users_collection = mongo.db.users
 
 # Set up the home route
-@app.route("/")
+@app.route("/api")
 def home():
     template_folder_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "templates"))
     print("Template Folder Path:", template_folder_path)
@@ -94,12 +94,12 @@ def home():
     return redirect(url_for('login'))
 
 # Route to serve index.html
-@app.route("/index")
+@app.route("/api/index")
 def index():
     return render_template("index.html")
 
 # Route to render the login page
-@app.route("/login", methods=["GET", "POST"])
+@app.route("/api/login", methods=["GET", "POST"])
 def login():
     setup_database()
     if request.method == "POST":
@@ -129,7 +129,7 @@ def login():
 
 
 # Route to render the registration page and handle registration
-@app.route("/register", methods=["GET", "POST"])
+@app.route("/api/register", methods=["GET", "POST"])
 def register():
     setup_database()  # Ensure the database is set up
 
