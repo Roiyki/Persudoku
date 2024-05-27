@@ -3,11 +3,12 @@ entries:
   appchart:
   - apiVersion: v2
     appVersion: "1.0"
-    created: 2024-05-27T15:56:02.000Z
+    created: 2024-05-27T17:37:22.2828406+03:00
     description: A Helm chart for Kubernetes
-    digest: 7b85c0e53a3e2d0cd3739e8d72c4861b29f0f4a1f3e8a31c3d83e6b0b1a24b2a
+    digest: "sha256:digest_value_here"
     name: appchart
+    type: application
     urls:
     - http://localhost:8080/appchart-0.1.0.tgz
     version: 0.1.0
-generated: "2024-05-27T15:56:02.956182+03:00"
+generated: "2024-05-27T17:37:22.2828406+03:00"
