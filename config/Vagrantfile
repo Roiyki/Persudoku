@@ -1,0 +1,68 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+Vagrant.configure("2") do |config|
+  config.vm.boot_timeout = 600
+
+  config.vm.provider "virtualbox" do |vb|
+    vb.customize ["modifyvm", :id, "--cableconnected1", "on"]
+    vb.customize ['modifyvm', :id, '--graphicscontroller', 'vmsvga']
+    vb.gui = false
+    vb.memory = "2048"
+    vb.cpus = 4
+  end
+
+  # Define the VM
+  config.vm.define "pyapp" do |server|
+    server.vm.box = "ubuntu/focal64"
+    # Configuring networking settings
+    server.vm.network "forwarded_port", guest: 8080, host: 8888
+    server.vm.network "forwarded_port", guest: 5000, host: 5000
+    server.vm.network "private_network", ip: "192.168.50.68"
+
+    #  Provisioning
+    server.vm.provision "shell" do |shell|
+      shell.inline = <<-SHELL
+         # Install Docker and dependencies
+         sudo apt-get update
+         sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
+         curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+         sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable"
+         sudo apt-get update
+         sudo apt-get install -y docker-ce docker-ce-cli containerd.io
+ 
+         # Install KinD
+         curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.10.0/kind-linux-amd64
+         chmod +x ./kind
+         sudo mv ./kind /usr/local/bin/kind
+ 
+         # Create KinD cluster
+         kind create cluster --name my-cluster
+ 
+         # Install kubectl
+         curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+         sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+ 
+         # Install Helm
+         curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+         chmod 700 get_helm.sh
+         ./get_helm.sh
+ 
+         # Clone your Git repository
+         git clone https://github.com/Roiyki/Persudoku.git
+         cd Persudoku/charts/appchart
+ 
+         # Start a simple HTTP server to serve Helm chart repository
+         nohup python3 -m http.server 8080 >/dev/null 2>&1 &
+ 
+         # Wait for the server to start
+         sleep 5
+ 
+         # Add the Helm chart repository to Helm
+         helm repo add my-repo http://localhost:8080
+ 
+         # Install the Helm chart
+         helm install sudoku-app my-repo/appchart
+       SHELL
+     end
+   end
+ end
