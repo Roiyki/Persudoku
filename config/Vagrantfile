@@ -41,7 +41,8 @@ Vagrant.configure("2") do |config|
 
         # Install kubectl
         curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-        sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+        chmod +x kubectl
+        sudo mv kubectl /usr/local/bin/
 
         # Install Helm
         curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
@@ -52,12 +53,34 @@ Vagrant.configure("2") do |config|
         git clone https://github.com/Roiyki/Persudoku.git
         cd Persudoku/charts/appchart
 
-        # Add the Helm chart repository to Helm using local files
-        helm repo add my-repo file://$(pwd)
+        # Serve the Helm chart repository over HTTP
+        python3 -m http.server 8080 &
+
+        # Wait for the HTTP server to start
+        sleep 10
+
+        # Check if the HTTP server is running
+        if curl -s http://localhost:8080/index.yaml; then
+          echo "HTTP server is running"
+        else
+          echo "HTTP server failed to start"
+          exit 1
+        fi
+
+        # Add the Helm chart repository to Helm
+        helm repo add my-repo http://localhost:8080
         helm repo update
+
+        # Create the namespace for MongoDB
+        kubectl create namespace mongo-namespace
 
         # Install the Helm chart
         helm install sudoku-app my-repo/appchart
+
+        #Get applications url
+        export NODE_PORT=$(kubectl get --namespace default -o jsonpath="{.spec.ports[0].nodePort}" services sudoku-app-appchart)
+        export NODE_IP=$(kubectl get nodes --namespace default -o jsonpath="{.items[0].status.addresses[0].address}")
+        echo http://$NODE_IP:$NODE_PORT
       SHELL
     end
   end
