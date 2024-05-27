@@ -1,0 +1,14 @@
+# persistentvolume.yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mongo-pv
+  namespace: mongo-namespace
+spec:
+  capacity:
+    storage: {{ .Values.mongo.persistence.size }}
+  accessModes:
+    - {{ .Values.mongo.persistence.accessMode }}
+  storageClassName: {{ .Values.mongo.persistence.storageClass }}
+  hostPath:
+    path: "/home/vagrant/mongodb_data"  # Replace with your host directory for volume storage

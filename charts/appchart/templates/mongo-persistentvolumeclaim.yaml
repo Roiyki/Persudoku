@@ -1,0 +1,13 @@
+# persistentvolumeclaim.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongo-pvc
+  namespace: mongo-namespace
+spec:
+  accessModes:
+    - {{ .Values.mongo.persistence.accessMode }}
+  resources:
+    requests:
+      storage: {{ .Values.mongo.persistence.size }}
+  storageClassName: {{ .Values.mongo.persistence.storageClass }}
