@@ -1,36 +1,31 @@
 replicaCount:
-  backend: 1
-  frontend: 1
+  flask: 1
   mongodb: 1
 
-backend:
+flask:
   image:
-    repository: roiyki/persudoku-backend:latest
+    repository: roiyki/persudoku-flask:latest
     pullPolicy: IfNotPresent
     tag: "latest"
   service:
-    type: ClusterIP
+    type: NodePort
     port: 5000
+  environment:
+    MONGO_URI: mongodb://mongo-service.mongo-namespace:27017/sudoku_app
 
-frontend:
+mongo:
   image:
-    repository: roiyki/persudoku-frontend:latest
+    repository: mongo
+    tag: 4.4
     pullPolicy: IfNotPresent
-    tag: "latest"
   service:
     type: ClusterIP
-    port: 80
-
-mongodb:
-  image:
-    repository: mongo:latest
-    pullPolicy: IfNotPresent
-    tag: "latest"
+    port: 27017
   persistence:
     enabled: true
-    existingClaim: ""
-    accessMode: ReadWriteOnce
     size: 1Gi
+    accessMode: ReadWriteOnce
+    storageClass: standard
 
 ingress:
   enabled: false

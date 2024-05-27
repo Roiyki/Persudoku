@@ -7,7 +7,7 @@
 </head>
 <body>
     <h1>Select Difficulty</h1>
-    <form id="generate-form" action="/api/generate_sudoku" method="POST">
+    <form id="generate-form" action="/generate_sudoku" method="POST">
         <label for="difficulty">Difficulty:</label><br>
         <select id="difficulty" name="difficulty">
             <option value="easy">Easy</option>
@@ -27,7 +27,7 @@
                 event.preventDefault(); // Prevent the default form submission
         
                 const formData = new FormData(generateForm);
-                fetch("/api/generate_sudoku", {
+                fetch("/generate_sudoku", {
                     method: "POST",
                     body: formData
                 })

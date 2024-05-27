@@ -11,7 +11,7 @@ print("Template Folder:", template_folder)
 app = Flask(__name__, template_folder=template_folder)
 
 # Update MongoDB URI to use the Docker service name
-app.config['MONGO_URI'] = os.environ.get('MONGO_URI', 'mongodb://mongodb:27017/sudoku_app')
+app.config['MONGO_URI'] = os.environ.get('MONGO_URI', 'mongodb://mongo-service.mongo-namespace:27017/sudoku_app')
 
 mongo = PyMongo(app)  # Initialize PyMongo instance
 
@@ -34,33 +34,43 @@ def possible(row, column, number):
     return True
 
 # Solve the Sudoku using backtracking
-def solve():
-    global grid
-    for row in range(0, 9):
-        for column in range(0, 9):
+def solve(grid):
+    for row in range(9):
+        for column in range(9):
             if grid[row][column] == 0:
                 for number in range(1, 10):
                     if possible(row, column, number):
                         grid[row][column] = number
-                        if solve():
+                        if solve(grid):
                             return True
                         grid[row][column] = 0
                 return False
     return True
 
 # Check if the grid is solvable
-def is_solvable():
-    global grid
-    original_grid = [row[:] for row in grid]
-    solvable = solve()
-    grid = original_grid
-    return solvable
+def is_solvable_grid(grid):
+    def solve(grid):
+        for row in range(9):
+            for column in range(9):
+                if grid[row][column] == 0:
+                    for number in range(1, 10):
+                        if possible(row, column, number):
+                            grid[row][column] = number
+                            if solve(grid):
+                                return True
+                            grid[row][column] = 0
+                    return False
+        return True
+
+    # Create a deep copy of the grid to avoid modifying the original grid
+    grid_copy = [row[:] for row in grid]
+    return solve(grid_copy)
 
 # Generate a full Sudoku grid
 def generate_full_grid():
     global grid
     grid = [[0 for _ in range(9)] for _ in range(9)]
-    solve()
+    solve(grid)
 
 # Remove cells to create a puzzle
 def remove_cells(n):
@@ -68,15 +78,16 @@ def remove_cells(n):
     count = n
     while count > 0:
         row = random.randint(0, 8)
-        column = random.randint(0, 8)
-        while grid[row][column] == 0:
+        col = random.randint(0, 8)
+        while grid[row][col] == 0:
             row = random.randint(0, 8)
-            column = random.randint(0, 8)
-        backup = grid[row][column]
-        grid[row][column] = 0
+            col = random.randint(0, 8)
+        backup = grid[row][col]
+        grid[row][col] = 0
 
-        if not is_solvable():
-            grid[row][column] = backup
+        # Check if the modified grid is still solvable
+        if not is_solvable_grid(grid):
+            grid[row][col] = backup
         else:
             count -= 1
 
@@ -86,20 +97,27 @@ def setup_database():
     users_collection = mongo.db.users
 
 # Set up the home route
-@app.route("/api")
+@app.route("/")
 def home():
     template_folder_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "templates"))
     print("Template Folder Path:", template_folder_path)
     setup_database()
     return redirect(url_for('login'))
 
+@app.route("/", methods=["POST"])
+def handle_post_request():
+    # Handle the POST request here
+    # Redirect to the login page after processing the request
+    return redirect(url_for('login'))
+
+
 # Route to serve index.html
-@app.route("/api/index")
+@app.route("/index")
 def index():
     return render_template("index.html")
 
 # Route to render the login page
-@app.route("/api/login", methods=["GET", "POST"])
+@app.route("/login", methods=["GET", "POST"])
 def login():
     setup_database()
     if request.method == "POST":
@@ -126,12 +144,11 @@ def login():
     else:
         return jsonify({"message": "Method not allowed"}), 405
 
-
-
 # Route to render the registration page and handle registration
-@app.route("/api/register", methods=["GET", "POST"])
+@app.route("/register", methods=["GET", "POST"])
 def register():
     setup_database()  # Ensure the database is set up
+    print(f"Request Method: {request.method}, URL: {request.url}")
 
     if request.method == "POST":
         try:
@@ -156,9 +173,10 @@ def register():
         return render_template("register.html")
 
 # Route to generate a Sudoku puzzle
-@app.route("/api/generate_sudoku", methods=["POST"])
+@app.route("/generate_sudoku", methods=["POST"])
 def generate_sudoku():
     global grid, attempts_left
+    print(f"Request Method: {request.method}, URL: {request.url}")
     difficulty = request.form.get("difficulty")
     print(f"Selected difficulty: {difficulty}")
     difficulties = {
@@ -174,18 +192,16 @@ def generate_sudoku():
     attempts_left = 3
     return jsonify({"redirect": url_for('sudoku', difficulty=difficulty)})
 
-
 @app.route("/sudoku")
 def sudoku():
     difficulty = request.args.get('difficulty', 'medium')  # Default to medium if not provided
     return render_template("sudoku.html", grid=grid, attempts_left=attempts_left, difficulty=difficulty)
 
-
-
 # Route to place a number on the Sudoku grid
-@app.route("/api/place_number", methods=["POST"])
+@app.route("/place_number", methods=["POST"])
 def place_number():
     global grid, attempts_left
+    print(f"Request Method: {request.method}, URL: {request.url}")
     selected_number = int(request.form.get("selected_number"))
     cell_index = request.form.get("cell_index")
     try:
@@ -199,9 +215,9 @@ def place_number():
             return jsonify({"message": "Cell is already filled"}), 400
         if possible(row, column, selected_number):
             grid[row][column] = selected_number
-            if all(all(cell != 0 for cell in row) for row in grid):  
+            if all(all(cell != 0 for cell in row) for row in grid):
                 return jsonify({"message": "Congratulations! You solved the puzzle!", "correct": True})
-            return jsonify({"message": "Number placed successfully",            "correct": True})
+            return jsonify({"message": "Number placed successfully", "correct": True})
         else:
             attempts_left -= 1
             if attempts_left <= 0:
@@ -213,23 +229,32 @@ def place_number():
 # Error handler for 400 Bad Request errors
 @app.errorhandler(400)
 def bad_request_error(error):
+    print(f"400 Error: {error}")
     return jsonify({"error": "Bad Request", "message": str(error)}), 400
 
 # Error handler for 401 Unauthorized errors
 @app.errorhandler(401)
 def unauthorized_error(error):
-    return jsonify({"error": "Unauthorized", "message": "Invalid credentials"}), 401
+    print(f"401 Error: {error}")
+    return jsonify({"error": "Unauthorized", "message": str(error)}), 401
 
 # Error handler for 404 Not Found errors
 @app.errorhandler(404)
 def not_found_error(error):
-    return jsonify({"error": "Not Found", "message": "The requested resource was not found on the server"}), 404
+    print(f"404 Error: {error}")
+    return jsonify({"error": "Not Found", "message": str(error)}), 404
 
-# Error handler for 500 Internal Server Error
+# Error handler for 405 Method Not Allowed errors
+@app.errorhandler(405)
+def method_not_allowed_error(error):
+    print(f"405 Error: {error}")
+    return jsonify({"error": "Method Not Allowed", "message": str(error)}), 405
+
+# Error handler for 500 Internal Server Error errors
 @app.errorhandler(500)
 def internal_server_error(error):
-    return jsonify({"error": "Internal Server Error", "message": "An unexpected error occurred on the server"}), 500
+    print(f"500 Error: {error}")
+    return jsonify({"error": "Internal Server Error", "message": str(error)}), 500
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000)
-
+    app.run(host='0.0.0.0', port=5000, debug=True)
