@@ -1,3 +1,6 @@
+{{- if .Values.service }}
+{{- if .Values.service.port }}
+{{- if .Values.service.nodePort }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -13,6 +16,16 @@ spec:
     app.kubernetes.io/instance: {{ .Release.Name }}
   ports:
     - protocol: TCP
-      port: 5000
-      targetPort: 5000
-      nodePort: {{ .Values.service.nodePort }}  # Define the nodePort value in values.yaml
+      port: {{ .Values.service.port }} # Use .Values.service.port instead of nil pointer
+      targetPort: {{ .Values.service.port }}
+      nodePort: {{ .Values.service.nodePort }} # Use .Values.service.nodePort
+{{- end }}
+{{- end }}
+{{- end }}
+{{- define "my-flask-app.name" -}}
+{{- printf "%s-%s" .Release.Name .Chart.Name | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{- define "my-flask-app.chart" -}}
+{{- .Chart.Name }}
+{{- end }}

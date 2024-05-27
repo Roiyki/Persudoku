@@ -1,15 +1,17 @@
+# Default values for your Helm chart
 replicaCount:
   flask: 1
   mongodb: 1
 
 flask:
   image:
-    repository: roiyki/persudoku-flask:latest
+    repository: roiyki/persudoku-flask
     pullPolicy: IfNotPresent
     tag: "latest"
   service:
     type: NodePort
     port: 5000
+    nodePort: 30000
   environment:
     MONGO_URI: mongodb://mongo-service.mongo-namespace:27017/sudoku_app
 
@@ -29,9 +31,13 @@ mongo:
 
 ingress:
   enabled: false
-  # Add your ingress configuration if needed
 
 resources: {}
-  # Add resources configuration if needed
 
-# Add other configurations as needed
+serviceAccount:
+  create: true
+  name: my-service-account
+  annotations:
+    key1: value1
+    key2: value2
+  automount: true

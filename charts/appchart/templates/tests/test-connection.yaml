@@ -11,5 +11,5 @@ spec:
     - name: wget
       image: busybox
       command: ['wget']
-      args: ['{{ include "appchart.fullname" . }}:{{ .Values.service.port }}']
+      args: ['{{ include "appchart.fullname" . }}:{{ .Values.flask.service.port }}']
   restartPolicy: Never

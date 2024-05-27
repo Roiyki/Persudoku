@@ -1,23 +1,37 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-backend
+  name: {{ .Release.Name }}-flask
   labels:
-    app: {{ .Release.Name }}-backend
+    app: {{ .Release.Name }}-flask
 spec:
-  replicas: {{ .Values.replicaCount.backend }}
+  replicas: {{ .Values.replicaCount.flask }} # Assuming .Values.replicaCount.flask exists
   selector:
     matchLabels:
-      app: {{ .Release.Name }}-backend
+      app: {{ .Release.Name }}-flask
   template:
     metadata:
       labels:
-        app: {{ .Release.Name }}-backend
+        app: {{ .Release.Name }}-flask
     spec:
       containers:
-        - name: backend
-          image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}"
+        - name: flask
+          image: "{{ .Values.flask.image.repository }}:{{ .Values.flask.image.tag }}"
           ports:
             - containerPort: 5000
           # Add volume mounts if needed
       # Add volumes if needed
+
+      # Service definition
+      {{- if .Values.flask.service.enabled }}
+      - name: flask-service
+        image: "{{ .Values.flask.service.image.repository }}:{{ .Values.flask.service.image.tag }}"
+        ports:
+          - protocol: TCP
+            port: {{ .Values.flask.service.port }}
+            targetPort: {{ .Values.flask.service.targetPort }}
+      {{- end }}
+
+{{- define "my-flask-app.fullname" -}}
+{{- printf "%s-%s" .Release.Name .Chart.Name | trunc 63 | trimSuffix "-" }}
+{{- end }}
