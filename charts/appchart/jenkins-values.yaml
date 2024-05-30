@@ -17,7 +17,8 @@ controller:
 
   jenkinsUrl: http://your-jenkins-url
 
-  serviceType: LoadBalancer
+  serviceType: NodePort
+  nodePort: 32000
 
   resources:
     requests:
