@@ -1,3 +1,6 @@
+replicaCount: 1  # Add this line to set the replica count
+
+
 controller:
   namespace: jenkins
   installPlugins:
@@ -98,13 +101,3 @@ controller:
               resourceRequestMemory: "512Mi"
               resourceLimitCpu: "1000m"
               resourceLimitMemory: "1024Mi"
-
-agent:
-  enabled: true
-  resources:
-    requests:
-      cpu: "200m"
-      memory: "256Mi"
-    limits:
-      cpu: "1000m"
-      memory: "1024Mi"

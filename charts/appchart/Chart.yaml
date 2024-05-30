@@ -25,5 +25,5 @@ appVersion: "1.16.0"
 
 dependencies:
   - name: jenkins
-    version: "4.0.19"
-    repository: "https://charts.jenkins.io"
+    version: "13.4.0"
+    repository: "https://charts.bitnami.com/bitnami"
