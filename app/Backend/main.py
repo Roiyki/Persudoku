@@ -186,7 +186,7 @@ def generate_sudoku():
     }
     if difficulty not in difficulties:
         print("Invalid difficulty level.")
-        return jsonify({"message": "Invalid difficulty level..."}), 400
+        return jsonify({"message": "Invalid difficulty level."}), 400
     generate_full_grid()
     remove_cells(difficulties[difficulty])
     attempts_left = 3
