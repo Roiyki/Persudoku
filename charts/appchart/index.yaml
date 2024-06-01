@@ -2,13 +2,13 @@ apiVersion: v1
 entries:
   appchart:
   - apiVersion: v2
-    appVersion: "1.0"
-    created: 2024-05-27T17:37:22.2828406+03:00
-    description: A Helm chart for Kubernetes
-    digest: "sha256:digest_value_here"
+    appVersion: 1.16.0
+    created: "2024-05-31T15:54:48.8003001+03:00"
+    description: A Helm chart for deploying a Flask application
+    digest: 9cd6def0426079084c6af1404001e337ce8338c01412972bd70a274e659187e2
     name: appchart
     type: application
     urls:
-    - http://localhost:8080/appchart-0.1.0.tgz
+    - appchart-0.1.0.tgz
     version: 0.1.0
-generated: "2024-05-27T17:37:22.2828406+03:00"
+generated: "2024-05-31T15:54:48.7969202+03:00"
