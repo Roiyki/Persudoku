@@ -1,20 +1,27 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: jenkins-master
+  namespace: {{ .Values.namespace }}
+spec:
+  type: {{ .Values.jenkinsMaster.service.type }}
+  ports:
+    - port: {{ .Values.jenkinsMaster.service.port }}
+      targetPort: 8080
+      nodePort: {{ .Values.jenkinsMaster.service.nodePort }}
+  selector:
+    app: jenkins-master
+
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: jenkins-service
-  namespace: jenkins-namespace
-  annotations:
-    prometheus.io/scrape: 'true'
-    prometheus.io/path: /
-    prometheus.io/port: '8080'
+  name: jenkins-dind
+  namespace: {{ .Values.namespace }}
 spec:
-  selector:
-    app: jenkins-server
-  type: {{ .Values.service.type }}
+  type: {{ .Values.jenkinsDinD.service.type }}
   ports:
-    - port: {{ .Values.service.port }}
-      targetPort: 8080
-      {{- if eq .Values.service.type "NodePort" }}
-      nodePort: {{ .Values.service.nodePort }}
-      {{- end }}
+    - port: {{ .Values.jenkinsDinD.service.port }}
+      targetPort: 2376
+  selector:
+    app: jenkins-dind
