@@ -1,44 +1,32 @@
----
-apiVersion: storage.k8s.io/v1
-kind: StorageClass
-metadata:
-  name: local-storage
-  namespace: jenkins-namespace
-provisioner: kubernetes.io/no-provisioner
-volumeBindingMode: WaitForFirstConsumer
----
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: jenkins-pv-volume
+  name: jenkins-pv
+  namespace: jenkins-namespace
   labels:
     type: local
 spec:
-  storageClassName: {{ .Values.persistence.storageClass }}
+  storageClassName: standard
   capacity:
-    storage: {{ .Values.persistence.size }}
+    storage: 10Gi
   accessModes:
-    - {{ .Values.persistence.accessMode }}
-  local:
-    path: {{ .Values.persistence.path }}
-  nodeAffinity:
-    required:
-      nodeSelectorTerms:
-      - matchExpressions:
-        - key: kubernetes.io/hostname
-          operator: In
-          values:
-          - {{ .Values.persistence.nodeAffinity }}
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/data/jenkins"
+
+
+
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: jenkins-pv-claim
-  namespace: {{ .Release.Namespace }}
+  name: jenkins-pvc
+  namespace: jenkins-namespace
 spec:
-  storageClassName: {{ .Values.persistence.storageClass }}
+  storageClassName: standard
   accessModes:
-    - {{ .Values.persistence.accessMode }}
+    - ReadWriteOnce
   resources:
     requests:
-      storage: {{ .Values.persistence.size }}
+      storage: 10Gi
+
