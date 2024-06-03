@@ -18,7 +18,7 @@ pipeline {
          stage('Run Tests') {
             steps {
                 // Run the tests using pytest
-                sh 'pytest sh C:\\apps\\FinalProject\\Persudoku\\app\\tests\\pytest app/tests/'
+                bat '"C:\\Users\\roiyd\\AppData\\Local\\Programs\\Python\\Python311\\Scripts\\pytest.exe" app\\tests'
             }
         }
 
