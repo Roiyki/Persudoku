@@ -173,7 +173,7 @@
             startTimer();
 
             const cellIndex = selectedCell.row * 9 + selectedCell.col;
-            fetch('/api/place_number', {
+            fetch('/place_number', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',

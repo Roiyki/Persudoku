@@ -16,11 +16,11 @@ spec:
         app: jenkins-master
     spec:
       securityContext:
-        runAsUser: 1000
+        runAsUser: 0  # Set user to root (0)
         fsGroup: 1000
       containers:
         - name: jenkins-master
-          image: my-jenkins:latest
+          image: roiyki/jenkins-helm:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
