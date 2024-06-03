@@ -18,7 +18,7 @@ pipeline {
          stage('Run Tests') {
             steps {
                 // Run the tests using pytest
-                sh 'pytest app/tests/'
+                sh '"C:\\Users\\roiyd\\AppData\\Local\\Programs\\Python\\Python311\\Scripts\\pytest.exe" app\\tests'
             }
         }
 
