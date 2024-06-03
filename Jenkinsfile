@@ -1,4 +1,3 @@
-how do my pipeline look?
 pipeline {
     agent any
 
