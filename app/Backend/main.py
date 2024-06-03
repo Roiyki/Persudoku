@@ -11,8 +11,8 @@ print("Template Folder:", template_folder)
 app = Flask(__name__, template_folder=template_folder)
 
 # Update MongoDB URI to use the Docker service name
-app.config['MONGO_URI'] = os.environ.get('MONGO_URI', 'mongodb://mongo-service.mongo-namespace:27017/sudoku_app')
-
+# app.config['MONGO_URI'] = os.environ.get('MONGO_URI', 'mongodb://mongo-service.mongo-namespace:27017/sudoku_app')
+app.config['MONGO_URI'] = os.environ.get('MONGO_URI', 'mongodb://localhost:27017/sudoku_app_test')
 mongo = PyMongo(app)  # Initialize PyMongo instance
 
 # Initialize the global grid and other variables
@@ -75,21 +75,23 @@ def generate_full_grid():
 # Remove cells to create a puzzle
 def remove_cells(n):
     global grid
-    count = n
-    while count > 0:
-        row = random.randint(0, 8)
-        col = random.randint(0, 8)
-        while grid[row][col] == 0:
-            row = random.randint(0, 8)
-            col = random.randint(0, 8)
-        backup = grid[row][col]
-        grid[row][col] = 0
+    cells_to_remove = 81 - n
+    positions = [(i, j) for i in range(9) for j in range(9)]
+    random.shuffle(positions)
+    for pos in positions:
+        row, col = pos
+        if cells_to_remove <= 0:
+            break
+        if grid[row][col] != 0:
+            backup = grid[row][col]
+            grid[row][col] = 0
 
-        # Check if the modified grid is still solvable
-        if not is_solvable_grid(grid):
-            grid[row][col] = backup
-        else:
-            count -= 1
+            # Check if the modified grid is still solvable
+            if not is_solvable_grid(grid):
+                grid[row][col] = backup
+            else:
+                cells_to_remove -= 1
+
 
 # Access the database within the app context
 def setup_database():
@@ -180,9 +182,9 @@ def generate_sudoku():
     difficulty = request.form.get("difficulty")
     print(f"Selected difficulty: {difficulty}")
     difficulties = {
-        'easy': 30,
+        'easy': 50,
         'medium': 40,
-        'hard': 50
+        'hard': 30
     }
     if difficulty not in difficulties:
         print("Invalid difficulty level.")

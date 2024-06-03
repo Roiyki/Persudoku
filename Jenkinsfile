@@ -1,3 +1,4 @@
+how do my pipeline look?
 pipeline {
     agent any
 
@@ -15,28 +16,34 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
+         stage('Run Tests') {
             steps {
-                sh 'docker build -t persudoku-flask:latest ./app/backend/'
-            }
-        }
-
-        stage('Manual Approval') {
-            steps {
-                input message: 'Approve to merge into main?', ok: 'Approve'
+                // Run the tests using pytest
+                sh 'pytest app/tests/'
             }
         }
 
         stage('Merge to Main') {
-            steps {
-                script {
-                    withCredentials([usernamePassword(credentialsId: 'github-credentials', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
-                        sh '''
-                        git checkout main
-                        git merge ${env.BRANCH_NAME}
-                        git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/your-repo.git main
-                        '''
+            when {
+                // Only execute this stage if the branch is a feature branch and tests pass
+                allOf {
+                    branch 'feature/*'
+                    not {
+                        changeRequest()
                     }
+                    expression {
+                        currentBuild.result == 'SUCCESS'
+                    }
+                }
+            }
+            steps {
+                // Merge the feature branch into main
+                sh 'git checkout main && git merge ${env.BRANCH_NAME} --no-ff --no-edit && git push origin main'
+            }
+            post {
+                success {
+                    // Send a notification to approve the merge
+                    input 'Please approve the merge to main'
                 }
             }
         }
