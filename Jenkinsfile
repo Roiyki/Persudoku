@@ -1,8 +1,7 @@
 pipeline {
     agent {
         kubernetes {
-            label 'jenkins-agent'
-            defaultContainer 'jnlp'
+            inheritFrom 'jenkins-agent'
             yaml """
 apiVersion: v1
 kind: Pod
