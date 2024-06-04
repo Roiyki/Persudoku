@@ -11,7 +11,9 @@ spec:
   containers:
     - name: jnlp
       image: roiyki/inbound-agent:latest
-      tty: true  // Remove the comment and ensure proper indentation
+      tty: true
+      ports:
+        - containerPort: 50000
   restartPolicy: Always
 """
         }
@@ -19,15 +21,10 @@ spec:
     stages {
         stage('Clone and Test') {
             steps {
-                // Use the container named 'jnlp'
                 container('jnlp') {
-                    // Make sure the git clone and test commands are running from the correct directory
                     dir('workspace') {
-                        // Clone the repository
                         sh 'git clone -b feature https://github.com/Roiyki/Persudoku.git'
-                        // Change directory to the cloned repository
                         dir('Persudoku') {
-                            // Run the tests
                             sh 'pytest app/Backend'
                         }
                     }
@@ -36,7 +33,6 @@ spec:
         }
         stage('Trigger Main Pipeline') {
             when {
-                // Only trigger the main pipeline if the branch is 'master' and the current build result is 'SUCCESS'
                 allOf {
                     branch 'master'
                     expression {
@@ -45,7 +41,6 @@ spec:
                 }
             }
             steps {
-                // Ask for user input before triggering the main pipeline
                 input 'Do you want to trigger the main pipeline?'
                 // Trigger the main pipeline here
             }
