@@ -11,7 +11,9 @@ spec:
   containers:
     - name: jnlp
       image: roiyki/inbound-agent:latest
-      tty: true  
+      tty: true
+      ports:
+        - containerPort: 50000
   restartPolicy: Always
 """
         }
@@ -40,6 +42,7 @@ spec:
             }
             steps {
                 input 'Do you want to trigger the main pipeline?'
+                // Trigger the main pipeline here
             }
         }
     }
