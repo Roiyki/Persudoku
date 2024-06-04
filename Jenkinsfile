@@ -1,7 +1,7 @@
 pipeline {
     agent {
         kubernetes {
-            // Define the pod template
+            inheritFrom 'jenkins-agent'
             yaml """
 apiVersion: v1
 kind: Pod
@@ -11,10 +11,7 @@ spec:
   containers:
     - name: jnlp
       image: roiyki/inbound-agent:latest
-      // Add tty for interactive shell
-      tty: true
-      // Add volume mounts if necessary
-      // Add environment variables if necessary
+      tty: true  // Remove the comment and ensure proper indentation
   restartPolicy: Always
 """
         }
