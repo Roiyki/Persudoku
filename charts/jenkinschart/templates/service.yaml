@@ -1,14 +1,14 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: jenkins-master
-  namespace: {{ .Values.namespace }}
+  name: jenkinsmasternodeport
+  namespace: jenkins-namespace
 spec:
-  type: {{ .Values.jenkinsMaster.service.type }}
+  type: NodePort
   ports:
-    - port: {{ .Values.jenkinsMaster.service.port }}
+    - port: 8080
       targetPort: 8080
-      nodePort: {{ .Values.jenkinsMaster.service.nodePort }}
+      nodePort: 31000
   selector:
     app: jenkins-master
 
@@ -16,12 +16,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: jenkins-dind
-  namespace: {{ .Values.namespace }}
+  name: jenkinsmasterclusterip
+  namespace: jenkins-namespace
 spec:
-  type: {{ .Values.jenkinsDinD.service.type }}
+  type: ClusterIP
   ports:
-    - port: {{ .Values.jenkinsDinD.service.port }}
-      targetPort: 2376
+    - port: 50000
+      targetPort: 50000
   selector:
-    app: jenkins-dind
+    app: jenkins-master

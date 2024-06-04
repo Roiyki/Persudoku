@@ -15,6 +15,7 @@ spec:
       labels:
         app: jenkins-master
     spec:
+      serviceAccountName: jenkins-sa  # Specify the Service Account name here
       securityContext:
         runAsUser: 0  # Set user to root (0)
         fsGroup: 1000
@@ -25,6 +26,8 @@ spec:
           ports:
             - containerPort: 8080
               name: http
+            - containerPort: 50000
+              name: jnlp
           volumeMounts:
             - name: jenkins-home
               mountPath: /var/jenkins_home

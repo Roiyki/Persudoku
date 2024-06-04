@@ -11,4 +11,4 @@ spec:
     - {{ .Values.mongo.persistence.accessMode }}
   storageClassName: {{ .Values.mongo.persistence.storageClass }}
   hostPath:
-    path: "/home/vagrant/mongodb_data"  # Replace with your host directory for volume storage
+    path: "/data/pv-data/mongodb"  # Replace with your host directory for volume storage
