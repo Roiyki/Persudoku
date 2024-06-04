@@ -3,10 +3,18 @@ namespace: jenkins-namespace
 jenkinsMaster:
   image: roiyki/jenkins-helm:latest
   imagePullPolicy: IfNotPresent
-  service:
-    type: NodePort
-    port: 8080
-    nodePort: 31000  # Add the NodePort you want to use, in the range 30000-32767
+  services:
+      jenkinsmasternodeport:
+        type: NodePort
+        ports:
+          port: 8080
+          targetport: 8080
+          nodePort: 31000  # NodePort for port 8080
+      jenkinsmasterclusterip:
+        type: ClusterIP
+        ports:
+          port: 50000   # New ClusterIP port for JNLP
+          targetport: 50000
   securityContext:
     runAsUser: 1000
     fsGroup: 1000
@@ -26,51 +34,30 @@ jenkinsMaster:
         claimName: jenkins-pvc
   
 
-
-  controller:
-    installPlugins:
-      - kubernetes:1.30.7
-      - workflow-aggregator:2.6
-      - credentials-binding:1.24
-      - git:4.10.0
-      - configuration-as-code:1.55
-      - token-macro:266.v44a80cf277fd
-      - json-path-api:2.8.0-5.v07cb_a_1ca_738c
-      # Add other plugins that were failing due to missing dependencies
-      - favorite:2.3.3
-      - github-branch-source:2.11.3
-      - blueocean:1.24.7
-      - blueocean-rest-impl:1.24.7
-      - blueocean-pipeline-api-impl:1.24.7
-      # Add any other plugins you need
-      - github:1.39.0
-      - github-branch-source:1789.v5b_0c0cea_18c3
-      - blueocean-git-pipeline:1.27.12
-      - blueocean-github-pipeline:1.27.12
-      - blueocean-pipeline-editor:1.27.12
-      - blueocean-bitbucket-pipeline:1.27.12
-      - blueocean-rest-impl:1.27.12
-      - blueocean-events:1.27.12
-
-jenkinsDinD:
-  image: docker:20.10.8-dind
-  imagePullPolicy: IfNotPresent
-  service:
-    type: ClusterIP
-    port: 2376
-  resources:
-    requests:
-      memory: "256Mi"
-      cpu: "250m"
-    limits:
-      memory: "1Gi"
-      cpu: "1"
-  volumeMounts:
-    - name: docker-certs
-      mountPath: /certs/client
-  volumes:
-    - name: docker-certs
-      emptyDir: {}
+controller:
+  installPlugins:
+    - kubernetes:1.30.7
+    - workflow-aggregator:2.6
+    - credentials-binding:1.24
+    - git:4.10.0
+    - configuration-as-code:1.55
+    - token-macro:266.v44a80cf277fd
+    - json-path-api:2.8.0-5.v07cb_a_1ca_738c
+    # Add other plugins that were failing due to missing dependencies
+    - favorite:2.3.3
+    - github-branch-source:2.11.3
+    - blueocean:1.24.7
+    - blueocean-rest-impl:1.24.7
+    - blueocean-pipeline-api-impl:1.24.7
+    # Add any other plugins you need
+    - github:1.39.0
+    - github-branch-source:1789.v5b_0c0cea_18c3
+    - blueocean-git-pipeline:1.27.12
+    - blueocean-github-pipeline:1.27.12
+    - blueocean-pipeline-editor:1.27.12
+    - blueocean-bitbucket-pipeline:1.27.12
+    - blueocean-rest-impl:1.27.12
+    - blueocean-events:1.27.12
 
 persistence:
   enabled: true
@@ -85,3 +72,11 @@ service:
 
 ingress:
   enabled: false
+
+serviceAccount:
+  create: true
+  name: jenkins-sa
+  annotations:
+    key1: value1
+    key2: value2
+  automount: true
