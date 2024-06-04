@@ -7,7 +7,6 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: jenkins-agent
-  namespace: jenkins-namespace
 spec:
   containers:
     - name: jnlp
