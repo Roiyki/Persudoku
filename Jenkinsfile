@@ -11,9 +11,7 @@ spec:
   containers:
     - name: jnlp
       image: roiyki/inbound-agent:latest
-      tty: true
-      ports:
-        - containerPort: 50000
+      tty: true  // Remove the comment and ensure proper indentation
   restartPolicy: Always
 """
         }
@@ -42,7 +40,6 @@ spec:
             }
             steps {
                 input 'Do you want to trigger the main pipeline?'
-                // Trigger the main pipeline here
             }
         }
     }
