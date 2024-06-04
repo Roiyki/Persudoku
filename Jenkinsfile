@@ -4,24 +4,16 @@ pipeline {
             label 'jenkins-agent'
             defaultContainer 'jnlp'
             yaml """
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: v1
+kind: Pod
 metadata:
   name: jenkins-agent
+  namespace: jenkins-namespace
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: jenkins-agent
-  template:
-    metadata:
-      labels:
-        app: jenkins-agent
-    spec:
-      containers:
-        - name: jnlp
-          image: roiyki/inbound-agent:latest
-      restartPolicy: Always
+  containers:
+    - name: jnlp
+      image: roiyki/inbound-agent:latest
+  restartPolicy: Always
 """
         }
     }
