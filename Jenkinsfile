@@ -20,10 +20,10 @@ pipeline {
                 value: "your-secret"  // Replace with reference to Jenkins Credential
               - name: JENKINS_AGENT_NAME
                 value: "your-agent-name"
-          - name: jenkins-dind
+          - name: jenkins-dind  // Consider removing if tests don't require Docker
             image: docker:20.10.8-dind
             imagePullPolicy: IfNotPresent
-            securityContext:  // Consider removing privileged for better security
+            securityContext:
               # privileged: true  // Commented out for better security
             ports:
               - containerPort: 2376
@@ -50,12 +50,10 @@ pipeline {
       }
     }
 
-    stage('Run Tests') {
+    stage('Run Tests') {  // Consider removing 'container' block if tests don't require Docker
       steps {
-        // Consider running tests directly on the agent (if tests don't require Docker)
-        container('jenkins-dind') {  // Keep this for now, consider removing later
-          sh 'pytest app/tests/'
-        }
+        // Assuming tests reside in the 'app/tests' directory
+        sh 'pytest app/tests/'
       }
     }
 
@@ -86,3 +84,4 @@ pipeline {
     }
   }
 }
+
