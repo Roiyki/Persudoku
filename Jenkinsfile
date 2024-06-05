@@ -1,7 +1,6 @@
 pipeline {
     agent {
         kubernetes {
-            inheritFrom 'jenkins-agent'
             yaml """
 apiVersion: v1
 kind: Pod
@@ -12,9 +11,14 @@ spec:
     - name: jnlp
       image: roiyki/inbound-agent:latest
       tty: true
-      ports:
-        - containerPort: 50000
-  restartPolicy: Always
+      volumeMounts:
+        - mountPath: /home/jenkins/agent
+          name: workspace-volume
+  restartPolicy: Never
+  volumes:
+    - emptyDir:
+        medium: ""
+      name: workspace-volume
 """
         }
     }
