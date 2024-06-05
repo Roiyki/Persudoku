@@ -3,7 +3,7 @@ import sys
 import pytest
 
 # Add the project directory to the Python path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 from app.Backend.main import app
 
