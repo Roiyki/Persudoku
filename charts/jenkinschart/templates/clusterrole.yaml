@@ -1,8 +1,8 @@
 apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
+kind: Role
 metadata:
-  name: secret-reader
   namespace: jenkins-namespace
+  name: jenkins-secrets-reader
 rules:
 - apiGroups: ["*"]
   resources: ["*"]
