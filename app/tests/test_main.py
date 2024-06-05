@@ -15,11 +15,6 @@ def client():
     with app.test_client() as client:
         yield client
 
-# Set up environment variable for MongoDB URI before running tests
-@pytest.fixture(scope='session', autouse=True)
-def set_mongo_uri():
-    os.environ['MONGO_URI'] = 'mongodb://localhost:27017/sudoku_app_test'
-
 def test_home_page(client):
     response = client.get('/')
     assert response.status_code == 302  # Ensure it redirects
