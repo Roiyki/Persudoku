@@ -1,14 +1,13 @@
 import os
 import pytest
 
-# Run the tests
 def run_tests():
-    # Change directory to the tests directory
-    os.chdir("app/tests")
-
-    # Run the tests with pytest
+    # Get the absolute path to the tests directory
+    tests_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'app', 'tests')
+    
+    # Run pytest from the tests directory
+    os.chdir(tests_dir)
     pytest.main()
 
-# Entry point for running tests
 if __name__ == "__main__":
     run_tests()
