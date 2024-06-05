@@ -1,65 +1,44 @@
 pipeline {
     agent {
         kubernetes {
-            inheritFrom 'jenkins-agent'
-            yaml """
+            yaml '''
 apiVersion: v1
 kind: Pod
-metadata:
-  name: jenkins-agent
 spec:
-  serviceAccountName: jenkins-sa
+  serviceAccount: jenkins-sa
   containers:
-    - name: jnlp
-      image: roiyki/inbound-agent:latest
-      tty: true
-      env:
-        - name: JENKINS_SECRET
-          valueFrom:
-            secretKeyRef:
-              name: jenkins-credentials
-              key: jenkins_secret
-      volumeMounts:
-        - mountPath: /home/jenkins/agent
-          name: workspace-volume
-  restartPolicy: Never
-  volumes:
-    - emptyDir:
-        medium: ""
-      name: workspace-volume
-"""
+  - name: custom
+    image: roiyki/inbound-agent:latest
+    command:
+    - cat
+    tty: true
+'''
         }
     }
     stages {
-        stage('Clone and Test') {
+        stage('Clone and Switch to Feature Branch') {
             steps {
-                container('jnlp') {
-                    dir('workspace') {
-                        sh 'git clone -b feature https://github.com/Roiyki/Persudoku.git'
-                        dir('Persudoku') {
-                            sh 'pytest app/Backend'
-                        }
-                    }
+                container('custom') {
+                    sh '''
+                    cd $HOME
+                    git clone https://github.com/Roiyki/Persudoku
+                    cd Persudoku
+                    git checkout feature
+                    '''
                 }
             }
         }
-        stage('Trigger Main Pipeline') {
-            when {
-                allOf {
-                    branch 'master'
-                    expression {
-                        currentBuild.result == 'SUCCESS'
-                    }
+        stage('Install Dependencies') {
+            steps {
+                container('custom') {
+                    sh 'pip install -r $HOME/Persudoku/app/Backend/requirements.txt'
                 }
             }
+        }
+        stage('Run Pytest') {
             steps {
-                input 'Do you want to trigger the main pipeline?'
-                script {
-                    def apiToken = env.API_TOKEN
-                    // Use the API token as needed, for example to trigger another job or an API call
-                    sh """
-                    curl -X POST -H 'Authorization: Bearer ${apiToken}' https://api.example.com/trigger-main-pipeline
-                    """
+                container('custom') {
+                    sh 'pytest --junitxml=test-results.xml $HOME/Persudoku/app/tests/test_main.py'
                 }
             }
         }
