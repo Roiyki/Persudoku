@@ -19,8 +19,6 @@ spec:
             secretKeyRef:
               name: jenkins-credentials
               key: jenkins_secret
-        - name: JENKINS_WEB_SOCKET
-          value: "true"
       volumeMounts:
         - mountPath: /home/jenkins/agent
           name: workspace-volume
