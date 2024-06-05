@@ -7,6 +7,7 @@ kind: Pod
 metadata:
   name: jenkins-agent
 spec:
+  serviceAccountName: jenkins-sa
   containers:
     - name: jnlp
       image: roiyki/inbound-agent:latest
