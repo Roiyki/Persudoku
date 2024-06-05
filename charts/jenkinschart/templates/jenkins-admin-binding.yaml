@@ -1,14 +1,12 @@
 apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
+kind: ClusterRoleBinding
 metadata:
   name: jenkins-secret-reader-binding
-  namespace: jenkins-namespace
 subjects:
 - kind: ServiceAccount
   name: jenkins-sa
   namespace: jenkins-namespace
 roleRef:
-  kind: ClusterRole  # Or "Role" if you created a Role instead of a ClusterRole
+  kind: ClusterRole
   name: secret-reader
   apiGroup: rbac.authorization.k8s.io
-
