@@ -1,12 +1,5 @@
 import os
-import sys
 import pytest
-
-# Get the root directory of the project
-ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
-
-# Add the root directory to the Python path
-sys.path.append(ROOT_DIR)
 
 from app.Backend.main import app
 
