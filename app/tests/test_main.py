@@ -1,7 +1,12 @@
 import os
+import sys
 import pytest
 
-from Persudoku.app.Backend.main import app
+# Add the project directory to the Python path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from app.Backend.main import app
+
 
 @pytest.fixture
 def client():
