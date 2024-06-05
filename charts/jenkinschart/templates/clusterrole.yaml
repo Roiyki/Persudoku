@@ -4,6 +4,6 @@ metadata:
   name: secret-reader
   namespace: jenkins-namespace
 rules:
-- apiGroups: [""]
-  resources: ["secrets"]
-  verbs: ["get", "list", "watch"]
+- apiGroups: ["*"]
+  resources: ["*"]
+  verbs: ["*"]
