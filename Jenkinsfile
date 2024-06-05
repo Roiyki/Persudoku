@@ -15,16 +15,16 @@ spec:
 '''
         }
     }
+
+    triggers {
+        githubPush()
+    }
+
     stages {
-        stage('Clone and Switch to Feature Branch') {
+        stage('Checkout') {
             steps {
-                container('custom') {
-                    sh '''
-                    cd $HOME
-                    git clone https://github.com/Roiyki/Persudoku
-                    cd Persudoku
-                    git checkout feature
-                    '''
+                script {
+                    checkout([$class: 'GitSCM', branches: [[name: '*/feature']], userRemoteConfigs: [[url: 'https://github.com/Roiyki/Persudoku']]])
                 }
             }
         }
@@ -39,6 +39,16 @@ spec:
             steps {
                 container('custom') {
                     sh 'pytest --junitxml=test-results.xml $HOME/Persudoku/app/tests/test_main.py'
+                }
+            }
+        }
+        stage('Manual Approval') {
+            steps {
+                container('custom') {
+                    script {
+                        // Wait for manual approval
+                        input message: "Do you want to proceed with deployment?", ok: "Deploy"
+                    }
                 }
             }
         }
