@@ -14,11 +14,11 @@ spec:
       image: roiyki/inbound-agent:latest
       tty: true
       env:
-        - name: API_TOKEN
+        - name: JENKINS_SECRET
           valueFrom:
             secretKeyRef:
-              name: api-token-secret
-              key: api_token
+              name: jenkins-credentials
+              key: jenkins_secret
       volumeMounts:
         - mountPath: /home/jenkins/agent
           name: workspace-volume
