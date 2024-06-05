@@ -11,6 +11,12 @@ spec:
     - name: jnlp
       image: roiyki/inbound-agent:latest
       tty: true
+      env:
+        - name: API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: api-token-secret
+              key: api_token
       volumeMounts:
         - mountPath: /home/jenkins/agent
           name: workspace-volume
@@ -46,7 +52,13 @@ spec:
             }
             steps {
                 input 'Do you want to trigger the main pipeline?'
-                // Trigger the main pipeline here
+                script {
+                    def apiToken = env.API_TOKEN
+                    // Use the API token as needed, for example to trigger another job or an API call
+                    sh """
+                    curl -X POST -H 'Authorization: Bearer ${apiToken}' https://api.example.com/trigger-main-pipeline
+                    """
+                }
             }
         }
     }
