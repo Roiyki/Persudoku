@@ -1,13 +1,13 @@
 import os
 import pytest
 
-from app.Backend.main import app
+from app.Backend.main import main
 
 @pytest.fixture
 def client():
     # Set up the Flask app for testing
-    app.testing = True
-    with app.test_client() as client:
+    main.testing = True
+    with main.test_client() as client:
         yield client
 
 # Set up environment variable for MongoDB URI before running tests
