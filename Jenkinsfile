@@ -22,12 +22,23 @@ spec:
         stage('Clone and Switch to Feature Branch') {
             steps {
                 container('custom') {
-                    sh '''
-                    cd $HOME
-                    git clone https://github.com/Roiyki/Persudoku
-                    cd Persudoku
-                    git checkout feature
-                    '''
+                    script {
+                        // Clone the repository
+                        sh '''
+                        cd $HOME
+                        git clone https://github.com/Roiyki/Persudoku
+                        cd Persudoku
+                        '''
+                        // Check if the feature branch exists
+                        sh '''
+                        git fetch origin
+                        if git rev-parse --quiet --verify feature; then
+                            git checkout feature
+                        else
+                            git checkout -b feature
+                        fi
+                        '''
+                    }
                 }
             }
         }
