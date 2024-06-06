@@ -15,6 +15,9 @@ spec:
 '''
         }
     }
+    triggers {
+        pollSCM('* * * * *') // Poll SCM every minute
+    }
     stages {
         stage('Clone and Switch to Feature Branch') {
             steps {
