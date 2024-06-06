@@ -9,7 +9,8 @@ from app.Backend.main import app
 
 @pytest.fixture(scope='session', autouse=True)
 def set_mongo_uri():
-    os.environ['MONGO_URI'] = 'mongodb://mongo-service.mongo-namespace:27017/sudoku_app'
+    # Set the MongoDB URI for the test
+    os.environ['MONGO_URI'] = 'mongodb://mongo-service.mongo-namespace:27017/sudoku_app_test'
 
 @pytest.fixture
 def client():
