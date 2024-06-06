@@ -19,6 +19,16 @@ spec:
         pollSCM('* * * * *') // Poll SCM every minute
     }
     stages {
+        stage('Setup Git') {
+            steps {
+                container('custom') {
+                    script {
+                        // Add exception for Jenkins workspace directory
+                        sh 'git config --global --add safe.directory $HOME/agent/workspace'
+                    }
+                }
+            }
+        }
         stage('Clone and Switch to Feature Branch') {
             steps {
                 container('custom') {
