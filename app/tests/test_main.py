@@ -32,12 +32,16 @@ def test_place_number(client):
     assert response.status_code == 400  # Expecting a Bad Request status code
 
 def test_registration(client):
-    # Simulate a registration request
-    response = client.post('/register', data={
+    # Print your registration data
+    registration_data = {
         'full_name': 'John Doe',
         'email': 'john@example.com',
         'password': 'password123'
-    })
+    }
+    print("Your Registration Data:", registration_data)
+
+    # Simulate a registration request
+    response = client.post('/register', data=registration_data)
 
     # Print request data
     print("Registration Request Data:", response.request.data)
