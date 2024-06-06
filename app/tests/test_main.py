@@ -39,6 +39,13 @@ def test_registration(client):
         'password': 'password123'
     })
 
+    # Print request data
+    print("Registration Request Data:", response.request.data)
+
+    # Print response status code and headers
+    print("Registration Response Status Code:", response.status_code)
+    print("Registration Response Headers:", response.headers)
+
     # Check if registration was successful
     assert response.status_code == 302  # Expecting a redirect status code
     assert response.headers['Location'] == '/login'  # Ensure it redirects to the relative login page
