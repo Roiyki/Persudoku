@@ -1,2 +1,2 @@
 Persudoku App
-your personal sudoku profile with scores
+your personal sudoku profile with scores!!!
