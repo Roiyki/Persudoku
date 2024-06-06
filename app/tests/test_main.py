@@ -7,6 +7,9 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 
 from app.Backend.main import app
 
+@pytest.fixture(scope='session', autouse=True)
+def set_mongo_uri():
+    os.environ['MONGO_URI'] = 'mongodb://mongo-service.mongo-namespace:27017/sudoku_app'
 
 @pytest.fixture
 def client():
@@ -26,7 +29,6 @@ def test_generate_sudoku(client):
 def test_place_number(client):
     response = client.post('/place_number', data={'selected_number': '5', 'cell_index': '0'})
     assert response.status_code == 400  # Expecting a Bad Request status code
-
 
 def test_registration(client):
     # Simulate a registration request
