@@ -23,8 +23,8 @@ spec:
             steps {
                 container('custom') {
                     script {
-                        // Add exception for Jenkins workspace directory
-                        sh 'git config --global --add safe.directory $HOME/agent/workspace'
+                        // Configure Git to trust the Jenkins workspace directory
+                        sh 'git config --global --add safe.directory /home/jenkins/agent/workspace/SudokuFeatureCI'
                     }
                 }
             }
