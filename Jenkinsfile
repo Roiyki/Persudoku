@@ -20,12 +20,6 @@ spec:
     triggers {
         pollSCM('H/5 * * * *') // Poll SCM every 5 minutes
     }
-    environment {
-        DOTENV = readProperties(file: '/.env') // Replace with the path to your .env file
-        GITHUB_USERNAME = "${DOTENV.GITHUB_USERNAME}"
-        GITHUB_TOKEN = "${DOTENV.GITHUB_TOKEN}"
-        GITHUB_REPO = "${DOTENV.GITHUB_REPO}"
-    }
     stages {
         stage('Setup Git') {
             steps {
@@ -47,6 +41,9 @@ spec:
                         git clone https://github.com/Roiyki/Persudoku
                         cd Persudoku
                         """
+                        // Source the .env file to load variables into the environment
+                        sh 'source $HOME/Persudoku/.env'
+                        
                         // Check if the feature branch exists
                         sh """
                         git fetch origin
@@ -63,6 +60,8 @@ spec:
         stage('Install Dependencies') {
             steps {
                 container('custom') {
+                    // Source the .env file again (to make sure variables are available)
+                    sh 'source $HOME/Persudoku/.env'
                     sh "pip install -r $HOME/${GITHUB_REPO}/app/Backend/requirements.txt"
                 }
             }
@@ -70,6 +69,8 @@ spec:
         stage('Run Pytest') {
             steps {
                 container('custom') {
+                    // Source the .env file again (to make sure variables are available)
+                    sh 'source $HOME/Persudoku/.env'
                     sh "pytest --junitxml=test-results.xml $HOME/${GITHUB_REPO}/app/tests/test_main.py"
                 }
             }
@@ -85,14 +86,29 @@ spec:
             post {
                 success {
                     script {
-                        // Trigger GitHub webhook
+                        // Merge feature branch into main branch
                         sh """
-                            curl -X POST \
-                            -u ${GITHUB_USERNAME}:${GITHUB_TOKEN} \
-                            -H 'Content-Type: application/json' \
-                            -d '{"event_type": "run_second_pipeline"}' \
-                            https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/dispatches
+                        git fetch origin
+                        git checkout main
+                        git merge --no-ff feature
+                        git push origin main
                         """
+                        
+                        // Delete feature branch
+                        sh """
+                        git push origin --delete feature
+                        """
+                        
+                        // Trigger GitHub webhook
+                        withCredentials([usernamePassword(credentialsId: 'github-secret-read-jenkins', usernameVariable: "${USERNAME}", passwordVariable: "${TOKEN}")]) { // Replace 'GITHUB_CREDENTIALS_ID' with your Jenkins credentials ID
+                            sh """
+                                curl -X POST \
+                                -u ${USERNAME}:${TOKEN} \
+                                -H 'Content-Type: application/json' \
+                                -d '{"event_type": "run_second_pipeline"}' \
+                                https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/dispatches
+                            """
+                        }
                     }
                 }
             }
