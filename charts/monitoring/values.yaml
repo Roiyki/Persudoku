@@ -7,7 +7,7 @@ prometheus:
     nodePort: 32100
   persistence:
     enabled: true
-    storageClass: Standard
+    storageClass: standard
     accessMode: ReadWriteOnce
     size: 1Gi  # Adjust the size as needed
   rbac:
@@ -24,7 +24,7 @@ grafana:
     nodePort: 32200
   persistence:
     enabled: true
-    storageClass: Standard
+    storageClass: standard
     accessMode: ReadWriteOnce
     size: 1Gi  # Adjust the size as needed
   ingress:
@@ -32,8 +32,8 @@ grafana:
 
 # Define storage classes if they are not provided by default
 storageClass:
-  prometheus: Standard
-  grafana: Standard
+  prometheus: standard
+  grafana: standard
 
 serviceAccount:
   create: false # or false, depending on your needs

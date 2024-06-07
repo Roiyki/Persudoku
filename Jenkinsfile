@@ -66,7 +66,7 @@ spec:
         stage('Run Pytest') {
             steps {
                 container('custom') {
-                    sh "pytest --junitxml=test-results.xml $HOME/Persudoku/app/tests/test_main.py"
+                    sh "pytest --junitxml=test-results.xml app/tests/test_main.py"
                 }
             }
         }
