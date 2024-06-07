@@ -21,7 +21,7 @@ spec:
         pollSCM('H/5 * * * *') // Poll SCM every 5 minutes
     }
     environment {
-        DOTENV = readProperties(file: 'path/to/your/.env') // Replace with the path to your .env file
+        DOTENV = readProperties(file: '/.env') // Replace with the path to your .env file
         GITHUB_USERNAME = "${DOTENV.GITHUB_USERNAME}"
         GITHUB_TOKEN = "${DOTENV.GITHUB_TOKEN}"
         GITHUB_REPO = "${DOTENV.GITHUB_REPO}"
