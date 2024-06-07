@@ -21,6 +21,7 @@ spec:
         GITHUB_TOKEN = credentials('github-secret-read-jenkins')
         GITHUB_USER = 'Roiyki'
         REPO = 'Roiyki/Persudoku'
+        GIT_CREDENTIALS_ID = 'github-secret-read-jenkins' // Update this with your Git credentials ID
     }
     triggers {
         pollSCM('H/5 * * * *') // Poll SCM every 5 minutes
@@ -41,7 +42,7 @@ spec:
                     script {
                         sh """
                         cd \$HOME
-                        git clone https://github.com/${REPO}
+                        git clone https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/${REPO}
                         cd Persudoku
                         git fetch origin
                         if git rev-parse --quiet --verify feature; then
