@@ -59,7 +59,7 @@ spec:
             steps {
                 container('custom') {
                     // Source the .env file again (to make sure variables are available)
-                    sh "pip install -r $HOME/Persudoku/app/Backend/requirements.txt"
+                    sh "pip install -r app/Backend/requirements.txt"
                 }
             }
         }
