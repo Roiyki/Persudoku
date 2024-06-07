@@ -1,7 +1,7 @@
 pipeline {
     agent {
         kubernetes {
-            label 'jenkins-slave' // Assign a label to the pod
+            label 'jenkins-slave'
             defaultContainer 'custom'
             yaml """
 apiVersion: v1
@@ -19,7 +19,8 @@ spec:
     }
     environment {
         GITHUB_TOKEN = credentials('github-secret-read-jenkins')
-        GITHUB_USER = credentials('github-secret-read-jenkins')
+        GITHUB_USER = 'Roiyki'
+        REPO = 'Roiyki/Persudoku'
     }
     triggers {
         pollSCM('H/5 * * * *') // Poll SCM every 5 minutes
@@ -29,7 +30,6 @@ spec:
             steps {
                 container('custom') {
                     script {
-                        // Configure Git to trust the Jenkins workspace directory
                         sh 'git config --global --add safe.directory /home/jenkins/agent/workspace/SudokuFeatureCI'
                     }
                 }
@@ -39,10 +39,9 @@ spec:
             steps {
                 container('custom') {
                     script {
-                        // Clone the repository
                         sh """
                         cd \$HOME
-                        git clone https://github.com/Roiyki/Persudoku
+                        git clone https://github.com/${REPO}
                         cd Persudoku
                         git fetch origin
                         if git rev-parse --quiet --verify feature; then
@@ -51,19 +50,13 @@ spec:
                             git checkout -b feature
                         fi
                 
-<<<<<<< HEAD
-=======
-                        # Copy files from main branch to feature branch
->>>>>>> parent of e7030fb (addid a monitoring chart)
                         git checkout main -- .
                         git add .
-                
-                        # Configure Git user identity
+                        git pull origin main
                         git config --global user.email "roiydonagi@gmail.com"
                         git config --global user.name "Roiyki"
-                
-                        # Commit changes
-                        git commit -m "Copy files from main branch to feature branch"
+                        git commit -m "Copy files from main branch to feature branch" || true
+                        git push origin feature
                         """
                     }
                 }
@@ -72,7 +65,6 @@ spec:
         stage('Install Dependencies') {
             steps {
                 container('custom') {
-                    // Source the .env file again (to make sure variables are available)
                     sh "pip install -r app/Backend/requirements.txt"
                 }
             }
@@ -84,59 +76,60 @@ spec:
                 }
             }
         }
-        stage('Manual Approval') {
+        stage('Update GitHub Status to Pending') {
             steps {
                 container('custom') {
                     script {
-                        // Execute git rev-parse HEAD to get the current commit hash
                         def commitHash = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
-
-                        // Send GitHub status check
                         sh """
                         curl -X POST \
                         -u ${GITHUB_USER}:${GITHUB_TOKEN} \
                         -H 'Content-Type: application/json' \
-                        -d '{"state": "pending", "description": "Manual approval required", "context": "jenkins/manual-approval"}' \
-                        https://api.github.com/repos/${GITHUB_USER}/Persudoku/statuses/${commitHash}
+                        -d '{"state": "pending", "description": "Pipeline in progress", "context": "jenkins/manual-approval"}' \
+                        https://api.github.com/repos/${REPO}/statuses/${commitHash}
                         """
-
-                        // Now you would typically wait for the GitHub status to be updated manually
-                        // For demonstration purposes, assuming manual approval is granted
-                        def manualApprovalGranted = true
+                    }
+                }
+            }
+        }
+        stage('Manual Approval') {
+            steps {
+                container('custom') {
+                    script {
+                        def manualApprovalGranted = input message: 'Approve deployment to main?', ok: 'Approve'
 
                         if (manualApprovalGranted) {
-                            // Check out main branch
-                            sh 'git checkout main'
+                            def commitHash = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
+                            sh """
+                            curl -X POST \
+                            -u ${GITHUB_USER}:${GITHUB_TOKEN} \
+                            -H 'Content-Type: application/json' \
+                            -d '{"state": "success", "description": "Manual approval granted", "context": "jenkins/manual-approval"}' \
+                            https://api.github.com/repos/${REPO}/statuses/${commitHash}
+                            """
 
-                            // Check if the feature branch exists
+                            sh 'git checkout main'
                             def featureBranchExists = sh(script: 'git show-ref --verify --quiet refs/heads/feature', returnStatus: true) == 0
 
                             if (featureBranchExists) {
-                                // Merge feature branch into main
                                 try {
                                     sh 'git merge --no-ff feature'
-                                    // Push changes to remote main branch
                                     sh 'git push origin main'
-                                    // Delete feature branch
                                     sh 'git branch -d feature'
                                 } catch (Exception mergeError) {
-                                    // Log merge error
                                     echo "Merge failed: ${mergeError}"
-                                    // Exit the pipeline with an error status
                                     currentBuild.result = 'FAILURE'
                                     error("Merge failed")
                                 }
                             } else {
                                 echo "Feature branch does not exist"
-                                // Exit the pipeline with an error status
                                 currentBuild.result = 'FAILURE'
                                 error("Feature branch does not exist")
                             }
 
-                            // Trigger SudokuCI-build pipeline
-                            build job: 'SudokuCI-build', parameters: [
-                                // Add parameters if needed
-                            ]
+                            build job: 'SudokuCI-build', parameters: []
+                        } else {
+                            error("Manual approval not granted")
                         }
                     }
                 }
