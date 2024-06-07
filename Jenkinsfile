@@ -66,8 +66,6 @@ spec:
         stage('Run Pytest') {
             steps {
                 container('custom') {
-                    // Source the .env file again (to make sure variables are available)
-                    sh 'source $HOME/Persudoku/.env'
                     sh "pytest --junitxml=test-results.xml $HOME/Persudoku/app/tests/test_main.py"
                 }
             }
