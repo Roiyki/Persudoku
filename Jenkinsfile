@@ -59,7 +59,6 @@ spec:
             steps {
                 container('custom') {
                     // Source the .env file again (to make sure variables are available)
-                    sh 'source $HOME/Persudoku/.env'
                     sh "pip install -r $HOME/Persudoku/app/Backend/requirements.txt"
                 }
             }
@@ -86,7 +85,7 @@ spec:
                         -u ${GITHUB_USER}:${GITHUB_TOKEN} \
                         -H 'Content-Type: application/json' \
                         -d '{"state": "pending", "description": "Manual approval required", "context": "jenkins/manual-approval"}' \
-                        https://api.github.com/repos/${GITHUB_USERNAME}/Persudoku/statuses/${commitHash}
+                        https://api.github.com/repos/${GITHUB_USER}/Persudoku/statuses/${commitHash}
                         """
 
                         // Now you would typically wait for the GitHub status to be updated manually
