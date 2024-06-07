@@ -17,6 +17,10 @@ spec:
 """
         }
     }
+    environment {
+        GITHUB_TOKEN = credentials('github-secret-read-jenkins')
+        GITHUB_USER = credentials('github-secret-read-jenkins')
+    }
     triggers {
         pollSCM('H/5 * * * *') // Poll SCM every 5 minutes
     }
@@ -40,12 +44,6 @@ spec:
                         cd \$HOME
                         git clone https://github.com/Roiyki/Persudoku
                         cd Persudoku
-                        """
-                        // Source the .env file to load variables into the environment
-                        sh 'source $HOME/Persudoku/.env'
-                        
-                        // Check if the feature branch exists
-                        sh """
                         git fetch origin
                         if git rev-parse --quiet --verify feature; then
                             git checkout feature
@@ -62,7 +60,7 @@ spec:
                 container('custom') {
                     // Source the .env file again (to make sure variables are available)
                     sh 'source $HOME/Persudoku/.env'
-                    sh "pip install -r $HOME/${GITHUB_REPO}/app/Backend/requirements.txt"
+                    sh "pip install -r $HOME/Persudoku/app/Backend/requirements.txt"
                 }
             }
         }
@@ -71,7 +69,7 @@ spec:
                 container('custom') {
                     // Source the .env file again (to make sure variables are available)
                     sh 'source $HOME/Persudoku/.env'
-                    sh "pytest --junitxml=test-results.xml $HOME/${GITHUB_REPO}/app/tests/test_main.py"
+                    sh "pytest --junitxml=test-results.xml $HOME/Persudoku/app/tests/test_main.py"
                 }
             }
         }
@@ -79,36 +77,17 @@ spec:
             steps {
                 container('custom') {
                     script {
-                        input message: "Do you want to proceed with deployment?", ok: "Deploy"
-                    }
-                }
-            }
-            post {
-                success {
-                    script {
-                        // Merge feature branch into main branch
+                        // Send GitHub status check
                         sh """
-                        git fetch origin
-                        git checkout main
-                        git merge --no-ff feature
-                        git push origin main
+                        curl -X POST \
+                        -u ${GITHUB_USER}:${GITHUB_TOKEN} \
+                        -H 'Content-Type: application/json' \
+                        -d '{"state": "pending", "description": "Manual approval required", "context": "jenkins/manual-approval"}' \
+                        https://api.github.com/repos/${GITHUB_USERNAME}/Persudoku/statuses/$(git rev-parse HEAD)
                         """
-                        
-                        // Delete feature branch
-                        sh """
-                        git push origin --delete feature
-                        """
-                        
-                        // Trigger GitHub webhook
-                        withCredentials([usernamePassword(credentialsId: 'github-secret-read-jenkins', usernameVariable: "${USERNAME}", passwordVariable: "${TOKEN}")]) { // Replace 'GITHUB_CREDENTIALS_ID' with your Jenkins credentials ID
-                            sh """
-                                curl -X POST \
-                                -u ${USERNAME}:${TOKEN} \
-                                -H 'Content-Type: application/json' \
-                                -d '{"event_type": "run_second_pipeline"}' \
-                                https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/dispatches
-                            """
-                        }
+
+                        // Now you would typically wait for the GitHub status to be updated manually
+                        // After manual approval, update the status to "success" or "failure" accordingly
                     }
                 }
             }

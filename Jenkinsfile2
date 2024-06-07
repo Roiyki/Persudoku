@@ -1,0 +1,55 @@
+pipeline {
+    agent {
+        kubernetes {
+            label 'jenkins-slave' // Assign a label to the pod
+            defaultContainer 'custom'
+            yaml """
+apiVersion: v1
+kind: Pod
+spec:
+  serviceAccountName: jenkins-sa
+  containers:
+  - name: custom
+    image: roiyki/inbound-agent2:latest
+    command:
+    - cat
+    tty: true
+"""
+        }
+    }
+    environment {
+        GITHUB_TOKEN = credentials('github-secret-read-jenkins')
+        GITHUB_USER = credentials('github-secret-read-jenkinsD')
+        DOCKER_HUB_USERNAME = credentials('dockerhub-jenkins-ID')
+        DOCKER_HUB_PASSWORD = credentials('dockerhub-jenkins-ID')
+    }
+    stages {
+        stage('Clone Repository') {
+            steps {
+                container('custom') {
+                    script {
+                        // Clone the GitHub repository
+                        sh "git clone https://github.com/Roiyki/Persudoku.git"
+                    }
+                }
+            }
+        }
+        stage('Build and Push Docker Image') {
+            steps {
+                script {
+                    // Docker build
+                    sh "docker build -t ${DOCKER_HUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG} ./Persudoku/Inboundagent2/"
+
+                    // Docker login to Docker Hub
+                    sh "docker login -u ${DOCKER_HUB_USERNAME} -p ${DOCKER_HUB_PASSWORD}"
+
+                    // Docker tag
+                    sh "docker tag ${DOCKER_HUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG} ${DOCKER_HUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG}"
+
+                    // Docker push
+                    sh "docker push ${DOCKER_HUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG}"
+                }
+            }
+        }
+    }
+}
