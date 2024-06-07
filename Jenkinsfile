@@ -56,8 +56,8 @@ spec:
                         git add .
                 
                         # Configure Git user identity
-                        git config --global user.email "you@example.com"
-                        git config --global user.name "Your Name"
+                        git config --global user.email "roiydonagi@gmail.com"
+                        git config --global user.name "Roiyki"
                 
                         # Commit changes
                         git commit -m "Copy files from main branch to feature branch"
