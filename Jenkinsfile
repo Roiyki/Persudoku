@@ -77,13 +77,16 @@ spec:
             steps {
                 container('custom') {
                     script {
+                        // Execute git rev-parse HEAD to get the current commit hash
+                        def commitHash = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
+
                         // Send GitHub status check
                         sh """
                         curl -X POST \
                         -u ${GITHUB_USER}:${GITHUB_TOKEN} \
                         -H 'Content-Type: application/json' \
                         -d '{"state": "pending", "description": "Manual approval required", "context": "jenkins/manual-approval"}' \
-                        https://api.github.com/repos/${GITHUB_USERNAME}/Persudoku/statuses/$(git rev-parse HEAD)
+                        https://api.github.com/repos/${GITHUB_USERNAME}/Persudoku/statuses/${commitHash}
                         """
 
                         // Now you would typically wait for the GitHub status to be updated manually
