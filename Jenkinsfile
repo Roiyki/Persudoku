@@ -1,22 +1,24 @@
 pipeline {
     agent {
         kubernetes {
-            yaml '''
+            label 'jenkins-slave' // Assign a label to the pod
+            defaultContainer 'custom'
+            yaml """
 apiVersion: v1
 kind: Pod
 spec:
-  serviceAccount: jenkins-sa
+  serviceAccountName: jenkins-sa
   containers:
   - name: custom
     image: roiyki/inbound-agent:latest
     command:
     - cat
     tty: true
-'''
+"""
         }
     }
     triggers {
-        pollSCM('* * * * *') // Poll SCM every minute
+        pollSCM('H/5 * * * *') // Poll SCM every 5 minutes
     }
     environment {
         DOTENV = readProperties(file: 'path/to/your/.env') // Replace with the path to your .env file
@@ -40,20 +42,20 @@ spec:
                 container('custom') {
                     script {
                         // Clone the repository
-                        sh '''
-                        cd $HOME
+                        sh """
+                        cd \$HOME
                         git clone https://github.com/${GITHUB_USERNAME}/${GITHUB_REPO}
                         cd ${GITHUB_REPO}
-                        '''
+                        """
                         // Check if the feature branch exists
-                        sh '''
+                        sh """
                         git fetch origin
                         if git rev-parse --quiet --verify feature; then
                             git checkout feature
                         else
                             git checkout -b feature
                         fi
-                        '''
+                        """
                     }
                 }
             }
@@ -84,7 +86,7 @@ spec:
                 success {
                     script {
                         // Trigger GitHub webhook
-                        withCredentials([usernamePassword(credentialsId: 'github-secret-read-jenkins', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN')]) { // Replace 'GITHUB_CREDENTIALS_ID' with your Jenkins credentials ID
+                        withCredentials([usernamePassword(credentialsId: 'GITHUB_CREDENTIALS_ID', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN')]) { // Replace 'GITHUB_CREDENTIALS_ID' with your Jenkins credentials ID
                             sh """
                                 curl -X POST \
                                 -u ${USERNAME}:${TOKEN} \
