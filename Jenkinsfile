@@ -51,7 +51,10 @@ spec:
                             git checkout -b feature
                         fi
                 
+<<<<<<< HEAD
+=======
                         # Copy files from main branch to feature branch
+>>>>>>> parent of e7030fb (addid a monitoring chart)
                         git checkout main -- .
                         git add .
                 
