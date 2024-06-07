@@ -42,7 +42,7 @@ spec:
                     script {
                         sh """
                         cd \$HOME
-                        git clone https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/${REPO}
+                        git clone https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/Roiyki/Persudoku.git
                         cd Persudoku
                         git fetch origin
                         if git rev-parse --quiet --verify feature; then
@@ -50,7 +50,7 @@ spec:
                         else
                             git checkout -b feature
                         fi
-                
+        
                         git checkout main -- .
                         git add .
                         git pull origin main
