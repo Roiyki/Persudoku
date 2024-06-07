@@ -76,6 +76,9 @@ spec:
                     script {
                         // Execute git rev-parse HEAD to get the current commit hash
                         def commitHash = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
+                
+                        // Print out the commit hash for verification
+                        echo "Commit Hash: ${commitHash}"
 
                         // Send GitHub status check
                         sh """
@@ -88,6 +91,11 @@ spec:
 
                         // Now you would typically wait for the GitHub status to be updated manually
                         // After manual approval, update the status to "success" or "failure" accordingly
+
+                        // Trigger SudokuCI-build pipeline
+                        build job: 'SudokuCI-build', parameters: [
+                            // Add parameters if needed
+                        ]
                     }
                 }
             }
