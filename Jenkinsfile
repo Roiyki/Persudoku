@@ -49,6 +49,10 @@ spec:
                             git checkout feature
                         else
                             git checkout -b feature
+                            # Copy files from main branch to feature branch
+                            git checkout main -- .
+                            git add .
+                            git commit -m "Copy files from main branch to feature branch"
                         fi
                         """
                     }
