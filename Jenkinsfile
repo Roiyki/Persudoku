@@ -49,11 +49,18 @@ spec:
                             git checkout feature
                         else
                             git checkout -b feature
-                            # Copy files from main branch to feature branch
-                            git checkout main -- .
-                            git add .
-                            git commit -m "Copy files from main branch to feature branch"
                         fi
+                
+                        # Copy files from main branch to feature branch
+                        git checkout main -- .
+                        git add .
+                
+                        # Configure Git user identity
+                        git config --global user.email "you@example.com"
+                        git config --global user.name "Your Name"
+                
+                        # Commit changes
+                        git commit -m "Copy files from main branch to feature branch"
                         """
                     }
                 }
