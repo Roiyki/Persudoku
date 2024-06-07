@@ -18,6 +18,12 @@ spec:
     triggers {
         pollSCM('* * * * *') // Poll SCM every minute
     }
+    environment {
+        DOTENV = readProperties(file: 'path/to/your/.env') // Replace with the path to your .env file
+        GITHUB_USERNAME = "${DOTENV.GITHUB_USERNAME}"
+        GITHUB_TOKEN = "${DOTENV.GITHUB_TOKEN}"
+        GITHUB_REPO = "${DOTENV.GITHUB_REPO}"
+    }
     stages {
         stage('Setup Git') {
             steps {
@@ -36,8 +42,8 @@ spec:
                         // Clone the repository
                         sh '''
                         cd $HOME
-                        git clone https://github.com/Roiyki/Persudoku
-                        cd Persudoku
+                        git clone https://github.com/${GITHUB_USERNAME}/${GITHUB_REPO}
+                        cd ${GITHUB_REPO}
                         '''
                         // Check if the feature branch exists
                         sh '''
@@ -55,14 +61,14 @@ spec:
         stage('Install Dependencies') {
             steps {
                 container('custom') {
-                    sh 'pip install -r $HOME/Persudoku/app/Backend/requirements.txt'
+                    sh 'pip install -r $HOME/${GITHUB_REPO}/app/Backend/requirements.txt'
                 }
             }
         }
         stage('Run Pytest') {
             steps {
                 container('custom') {
-                    sh 'pytest --junitxml=test-results.xml $HOME/Persudoku/app/tests/test_main.py'
+                    sh 'pytest --junitxml=test-results.xml $HOME/${GITHUB_REPO}/app/tests/test_main.py'
                 }
             }
         }
@@ -71,6 +77,22 @@ spec:
                 container('custom') {
                     script {
                         input message: "Do you want to proceed with deployment?", ok: "Deploy"
+                    }
+                }
+            }
+            post {
+                success {
+                    script {
+                        // Trigger GitHub webhook
+                        withCredentials([usernamePassword(credentialsId: 'github-secret-read-jenkins', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN')]) { // Replace 'GITHUB_CREDENTIALS_ID' with your Jenkins credentials ID
+                            sh """
+                                curl -X POST \
+                                -u ${USERNAME}:${TOKEN} \
+                                -H 'Content-Type: application/json' \
+                                -d '{"event_type": "run_second_pipeline"}' \
+                                https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/dispatches
+                            """
+                        }
                     }
                 }
             }
