@@ -91,11 +91,23 @@ spec:
 
                         // Now you would typically wait for the GitHub status to be updated manually
                         // After manual approval, update the status to "success" or "failure" accordingly
+                        // For demonstration purposes, assuming manual approval is granted
+                        def manualApprovalGranted = true
 
-                        // Trigger SudokuCI-build pipeline
-                        build job: 'SudokuCI-build', parameters: [
-                            // Add parameters if needed
-                        ]
+                        if (manualApprovalGranted) {
+                            // Merge feature branch to main and delete feature branch
+                            sh """
+                            git checkout main
+                            git merge --no-ff feature
+                            git push origin main
+                            git branch -d feature
+                            """
+
+                            // Trigger SudokuCI-build pipeline
+                            build job: 'SudokuCI-build', parameters: [
+                                // Add parameters if needed
+                            ]
+                        }
                     }
                 }
             }
