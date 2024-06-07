@@ -1,0 +1,22 @@
+name: Create Pull Request
+
+on:
+  push:
+    branches:
+      - "feature/*"  # This triggers on pushes to branches starting with "feature/"
+
+jobs:
+  create-pull-request:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3  # Checkout the repository code
+        with:
+          fetch-depth: 0  # Fetch all branches
+
+      - name: Create pull request
+        uses: actions/create-pull-request@v4  # Create a pull request
+        with:
+          title: 'Automatic pull request from Jenkins pipeline'  # Optional title for the pull request
+          body: 'Changes from Jenkins pipeline build.'  # Optional body for the pull request
+          branch: ${{ github.ref }}  # Use the branch that was pushed
+          base: main  # Merge into the main branch (change this if needed)
