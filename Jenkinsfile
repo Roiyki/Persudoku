@@ -41,6 +41,12 @@ spec:
                 container('custom') {
                     script {
                         sh """
+                            cd \$HOME
+                            GITHUB_TOKEN_RAW=$(credentials('github-secret-read-jenkins'))
+                            echo "Retrieved access token: $GITHUB_TOKEN_RAW" 
+                        git clone https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/Roiyki/Persudoku.git
+                        """
+                        sh """
                         cd \$HOME
                         git clone https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/Roiyki/Persudoku.git
                         cd Persudoku
