@@ -19,8 +19,8 @@ spec:
     }
     environment {
         GITHUB_TOKEN = credentials('github-secret-read-jenkins')
-        GITHUB_USER = 'Roiyki'
-        REPO = 'Roiyki/Persudoku'
+        GITHUB_USER = 'roiydonagi@gmail.com'
+        REPO = 'Persudoku'
         GIT_CREDENTIALS_ID = 'github-secret-read-jenkins' // Update this with your Git credentials ID
     }
     triggers {
