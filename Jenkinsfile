@@ -44,8 +44,8 @@ spec:
                         // Clone the repository
                         sh """
                         cd \$HOME
-                        git clone https://github.com/${GITHUB_USERNAME}/${GITHUB_REPO}
-                        cd ${GITHUB_REPO}
+                        git clone https://github.com/Roiyki/Persudoku
+                        cd Persudoku
                         """
                         // Check if the feature branch exists
                         sh """
@@ -63,14 +63,14 @@ spec:
         stage('Install Dependencies') {
             steps {
                 container('custom') {
-                    sh 'pip install -r $HOME/${GITHUB_REPO}/app/Backend/requirements.txt'
+                    sh "pip install -r $HOME/${GITHUB_REPO}/app/Backend/requirements.txt"
                 }
             }
         }
         stage('Run Pytest') {
             steps {
                 container('custom') {
-                    sh 'pytest --junitxml=test-results.xml $HOME/${GITHUB_REPO}/app/tests/test_main.py'
+                    sh "pytest --junitxml=test-results.xml $HOME/${GITHUB_REPO}/app/tests/test_main.py"
                 }
             }
         }
@@ -86,15 +86,13 @@ spec:
                 success {
                     script {
                         // Trigger GitHub webhook
-                        withCredentials([usernamePassword(credentialsId: 'GITHUB_CREDENTIALS_ID', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN')]) { // Replace 'GITHUB_CREDENTIALS_ID' with your Jenkins credentials ID
-                            sh """
-                                curl -X POST \
-                                -u ${USERNAME}:${TOKEN} \
-                                -H 'Content-Type: application/json' \
-                                -d '{"event_type": "run_second_pipeline"}' \
-                                https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/dispatches
-                            """
-                        }
+                        sh """
+                            curl -X POST \
+                            -u ${GITHUB_USERNAME}:${GITHUB_TOKEN} \
+                            -H 'Content-Type: application/json' \
+                            -d '{"event_type": "run_second_pipeline"}' \
+                            https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/dispatches
+                        """
                     }
                 }
             }
