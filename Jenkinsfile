@@ -15,15 +15,33 @@ spec:
     - cat
     tty: true
 """
-        }
+        }    
     }
     environment {
         JENKINS_SECRETS = credentials('jenkins-secrets-json')
     }
-    triggers {
-        pollSCM('H/5 * * * *') // Poll SCM every 5 minutes
-    }
+
     stages {
+        stage('Check for Changes') {
+            steps {
+                script {
+                    def githubAPIUrl = "https://api.github.com/repos/Roiyki/Persudoku/commits?sha=main"
+                    def response = httpRequest(
+                        url: githubAPIUrl,
+                        authentication: 'jenkins-secrets-json'
+                    )
+
+                    if (response.status == 200) {
+                        // Check if there are any new commits
+                        def commits = readJSON text: response.content
+                        if (commits.size() > 0) {
+                            // Trigger another Jenkins job
+                            build job: 'sudokuCI2', parameters: []
+                        }
+                    }
+                }
+            }
+        }
         stage('Setup Git') {
             steps {
                 container('custom') {
