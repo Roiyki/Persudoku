@@ -70,23 +70,6 @@ pipeline {
     }
 
     stages {
-        stage('Start Docker Daemon') {
-            steps {
-                container('custom') {
-                    script {
-                        // Check if Docker daemon is running
-                        def dockerRunning = sh(script: 'docker info >/dev/null 2>&1 && echo "true" || echo "false"', returnStatus: true).trim() == '0'
-
-                        // Start Docker daemon if not running
-                        if (!dockerRunning) {
-                            sh 'dockerd &'
-                            sleep 10 // Wait for Docker daemon to start (adjust wait time as needed)
-                        }
-                    }
-                }
-            }
-        }
-
         stage('Clone Repository') {
             steps {
                 container('custom') {
