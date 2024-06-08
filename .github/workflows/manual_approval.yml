@@ -1,0 +1,42 @@
+name: Manual Approval Pipeline
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  manual-approval:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      # Wait for manual approval
+      - name: Wait for approval
+        uses: jenkins-x/github-approval@v2
+        with:
+          approve_label: Approve
+          reviewers: 'Roiyki'  # Replace with usernames or teams who can approve
+
+      # Merge feature branch into main after approval
+      - name: Merge feature branch into main
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout main
+          git merge --no-ff ${{ github.head_ref }} -m "Merge feature branch ${{ github.head_ref }} into main"
+          git push origin main
+
+      # Delete the feature branch after merging
+      - name: Delete feature branch
+        run: |
+          git push origin --delete ${{ github.head_ref }}
+
+      # Execute post-approval steps in Jenkins
+      - name: Trigger Jenkins job
+        uses: jenkins-x/jx-promote@v4.3.2
+        with:
+          workflow_steps: |
+            # Replace with the actual steps you want to execute in Jenkins after approval
+            echo "Triggering Jenkins job..."
+            curl -X POST "http://localhost:31000/job/sudokuCI2/build" --user "your-jenkins-username:your-jenkins-api-token"

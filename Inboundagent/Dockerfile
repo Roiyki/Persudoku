@@ -1,18 +1,23 @@
-FROM python:3.9
+# FROM python:3.9
 
-WORKDIR /app
+# WORKDIR /app
 
-# Copy your application code
-COPY . .
+# # Install git and pytest as root
+# USER root
+# RUN apt-get update && \
+#     apt-get install -y git openssh-client python3-pip && \
+#     pip install pytest
 
-# Install git and pytest
-RUN apt-get update && apt-get install -y git openssh-client python3-pip
-RUN pip install pytest
+# # Switch back to the default user (usually non-root)
+# USER <original_user>
 
-# Environment variables for security (replace with actual setup)
-ENV GIT_USERNAME=$GIT_USERNAME
-ENV GIT_PAT=$GIT_PAT
+# # Copy your application code
+# COPY . .
 
-# Function to clone a branch (replace with your logic)
-COPY clone_branch.sh clone_branch.sh
-RUN chmod +x clone_branch.sh
+FROM roiyki/inbound-agent
+
+# Install sudo package
+RUN apt-get update && apt-get install -y sudo
+
+# Add jenkins user to sudoers file
+RUN echo "jenkins ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
