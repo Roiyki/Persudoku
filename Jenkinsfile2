@@ -10,7 +10,7 @@ spec:
   serviceAccountName: jenkins-sa
   containers:
   - name: custom
-    image: roiyki/inbound-agent2:latest  # Ensure this image has Docker build tools
+    image: roiyki/inbound-agent2:latest
     command:
     - cat
     tty: true
@@ -30,12 +30,9 @@ spec:
     }
   }
 
-
   environment {
     GITHUB_TOKEN = credentials('github-secret-read-jenkins')
-    GITHUB_USER = credentials('github-secret-read-jenkins')
-    DOCKER_HUB_USERNAME = credentials('docker-credentials')
-    DOCKER_HUB_PASSWORD = credentials('docker-credentials')
+    DOCKER_HUB_CREDENTIALS = credentials('docker-credentials')
     IMAGE_NAME = 'persudoku-flask'
     IMAGE_TAG = 'latest'
   }
@@ -52,20 +49,21 @@ spec:
       }
     }
 
-
     stage('Build and Push Docker Image') {
       steps {
         container('custom') {
           script {
-
-            def dirPath = sh(script: 'find . -type d -name Inboundagent2', returnStdout: true).trim()
-
-
-            sh "docker login -u ${DOCKER_HUB_USERNAME} -p ${DOCKER_HUB_PASSWORD}"
-            sh "docker build -t ${DOCKER_HUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG} ${dirPath}"
-
-
-            sh "docker push ${DOCKER_HUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG}"
+            try {
+              withCredentials([usernamePassword(credentialsId: 'docker-credentials', usernameVariable: 'DOCKER_HUB_USERNAME', passwordVariable: 'DOCKER_HUB_PASSWORD')]) {
+                sh "docker login -u $DOCKER_HUB_USERNAME -p $DOCKER_HUB_PASSWORD"
+                def dirPath = sh(script: 'find . -type d -name Inboundagent2', returnStdout: true).trim()
+                sh "docker build -t $DOCKER_HUB_USERNAME/$IMAGE_NAME:$IMAGE_TAG $dirPath"
+                sh "docker push $DOCKER_HUB_USERNAME/$IMAGE_NAME:$IMAGE_TAG"
+              }
+            } catch (Exception e) {
+              echo "Failed to build and push Docker image: ${e.message}"
+              currentBuild.result = 'FAILURE'
+            }
           }
         }
       }
