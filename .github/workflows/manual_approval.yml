@@ -7,36 +7,52 @@ on:
 jobs:
   manual-approval:
     runs-on: ubuntu-latest
-
+    
     steps:
       - uses: actions/checkout@v3
-
+    
       # Wait for manual approval
       - name: Wait for approval
         uses: jenkins-x/github-approval@v2
         with:
           approve_label: Approve
-          reviewers: 'Roiyki'  # Replace with usernames or teams who can approve
+          reviewers: '@your-username'  # Replace with usernames or teams who can approve
+    
+      # Configure Git user settings
+      - name: Configure Git user
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+    
+      # Verify Git user settings (optional)
+      - name: Verify Git user settings
+        run: |
+          git config --global --get user.name
+          git config --global --get user.email
+    
+      # Parse Jenkins secrets
+      - name: Parse Jenkins secrets
+        id: parse_secrets
+        run: |
+          echo "JENKINS_USERNAME=$(echo ${{ secrets.JENKINS_SECRETS }} | jq -r '.JENKINS_USERNAME')" >> $GITHUB_ENV
+          echo "JENKINS_API_TOKEN=$(echo ${{ secrets.JENKINS_SECRETS }} | jq -r '.JENKINS_API_TOKEN')" >> $GITHUB_ENV
 
       # Merge feature branch into main after approval
       - name: Merge feature branch into main
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git checkout main
-          git merge --no-ff ${{ github.head_ref }} -m "Merge feature branch ${{ github.head_ref }} into main"
+          git merge feature-branch
           git push origin main
-
-      # Delete the feature branch after merging
-      - name: Delete feature branch
-        run: |
-          git push origin --delete ${{ github.head_ref }}
-
-      # Execute post-approval steps in Jenkins
+    
+          # Delete feature branch locally and remotely
+          git branch -d feature-branch
+          git push origin --delete feature-branch
+    
+      # Trigger Jenkins job
       - name: Trigger Jenkins job
-        uses: jenkins-x/jx-promote@v4.3.2
+        uses: jenkinsci/github-actions-build@v1
         with:
-          workflow_steps: |
-            # Replace with the actual steps you want to execute in Jenkins after approval
-            echo "Triggering Jenkins job..."
-            curl -X POST "http://localhost:31000/job/sudokuCI2/build" --user "your-jenkins-username:your-jenkins-api-token"
+          jenkins_url: 'https://your-jenkins-url'
+          job_name: 'sudokuCI2'
+          user: ${{ env.JENKINS_USERNAME }}
+          token: ${{ env.JENKINS_API_TOKEN }}
