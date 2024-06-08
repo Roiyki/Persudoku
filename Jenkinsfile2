@@ -31,8 +31,12 @@ spec:
             steps {
                 container('custom') {
                     script {
-                        // Clone the GitHub repository
+                        // Clone the GitHub repository and change directory
                         sh "git clone https://github.com/Roiyki/Persudoku.git && cd Persudoku"
+
+                        // Use find command to locate Inboundagent2 directory
+                        def inboundAgent2Dir = sh(returnStdout: true, script: 'find . -type d -name Inboundagent2').trim()
+                        echo "Inboundagent2 directory found at: ${inboundAgent2Dir}"
                     }
                 }
             }
