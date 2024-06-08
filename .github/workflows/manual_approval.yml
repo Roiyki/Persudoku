@@ -16,7 +16,7 @@ jobs:
         uses: jenkins-x/github-approval@v2
         with:
           approve_label: Approve
-          reviewers: '@your-username'  # Replace with usernames or teams who can approve
+          reviewers: 'Roiyki'  # Replace with usernames or teams who can approve
     
       # Configure Git user settings
       - name: Configure Git user
@@ -52,7 +52,7 @@ jobs:
       - name: Trigger Jenkins job
         uses: jenkinsci/github-actions-build@v1
         with:
-          jenkins_url: 'https://your-jenkins-url'
+          jenkins_url: 'https://localhost:31000'
           job_name: 'sudokuCI2'
           user: ${{ env.JENKINS_USERNAME }}
           token: ${{ env.JENKINS_API_TOKEN }}
