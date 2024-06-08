@@ -18,10 +18,7 @@ spec:
         }
     }
     environment {
-        GITHUB_TOKEN = credentials('github-secret-read-jenkins')
-        GITHUB_USER = 'Roiyki'
-        REPO = 'Persudoku'
-        GIT_CREDENTIALS_ID = 'github-secret-read-jenkins' // Update this with your Git credentials ID
+        JENKINS_SECRETS = credentials('jenkins-secrets-json')
     }
     triggers {
         pollSCM('H/5 * * * *') // Poll SCM every 5 minutes
@@ -40,9 +37,12 @@ spec:
             steps {
                 container('custom') {
                     script {
+                        def jenkinsToken = sh(script: 'echo $JENKINS_SECRETS | jq -r ".token"', returnStdout: true).trim()
+                        def jenkinsUser = sh(script: 'echo $JENKINS_SECRETS | jq -r ".user"', returnStdout: true).trim()
+                        
                         sh """
                         cd \$HOME
-                        git clone https://${GITHUB_TOKEN}@github.com/Roiyki/Persudoku.git
+                        git clone https://${jenkinsUser}:${jenkinsToken}@github.com/Roiyki/Persudoku.git
                         cd Persudoku
                         git fetch origin
                         if git rev-parse --quiet --verify feature; then
@@ -82,12 +82,15 @@ spec:
                 container('custom') {
                     script {
                         def commitHash = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
+                        def jenkinsToken = sh(script: 'echo $JENKINS_SECRETS | jq -r ".token"', returnStdout: true).trim()
+                        def jenkinsUser = sh(script: 'echo $JENKINS_SECRETS | jq -r ".user"', returnStdout: true).trim()
+                        
                         sh """
                         curl -X POST \
-                        -u ${GITHUB_USER}:${GITHUB_TOKEN} \
+                        -u ${jenkinsUser}:${jenkinsToken} \
                         -H 'Content-Type: application/json' \
                         -d '{"state": "pending", "description": "Pipeline in progress", "context": "jenkins/manual-approval"}' \
-                        https://api.github.com/repos/${REPO}/statuses/${commitHash}
+                        https://api.github.com/repos/Roiyki/Persudoku/statuses/${commitHash}
                         """
                     }
                 }
@@ -101,12 +104,15 @@ spec:
 
                         if (manualApprovalGranted) {
                             def commitHash = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
+                            def jenkinsToken = sh(script: 'echo $JENKINS_SECRETS | jq -r ".token"', returnStdout: true).trim()
+                            def jenkinsUser = sh(script: 'echo $JENKINS_SECRETS | jq -r ".user"', returnStdout: true).trim()
+                            
                             sh """
                             curl -X POST \
-                            -u ${GITHUB_USER}:${GITHUB_TOKEN} \
+                            -u ${jenkinsUser}:${jenkinsToken} \
                             -H 'Content-Type: application/json' \
                             -d '{"state": "success", "description": "Manual approval granted", "context": "jenkins/manual-approval"}' \
-                            https://api.github.com/repos/${REPO}/statuses/${commitHash}
+                            https://api.github.com/repos/Roiyki/Persudoku/statuses/${commitHash}
                             """
 
                             sh 'git checkout main'
@@ -128,7 +134,7 @@ spec:
                                 error("Feature branch does not exist")
                             }
 
-                            build job: 'SudokuCI-build', parameters: []
+                            build job: 'sudokuCI2', parameters: []
                         } else {
                             error("Manual approval not granted")
                         }

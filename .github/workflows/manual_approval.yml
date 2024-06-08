@@ -16,7 +16,7 @@ jobs:
         uses: jenkins-x/github-approval@v2
         with:
           approve_label: Approve
-          reviewers: 'Roiyki'  # Replace with usernames or teams who can approve
+          reviewers: '@Roiyki'  # Replace with usernames or teams who can approve
     
       # Configure Git user settings
       - name: Configure Git user
@@ -30,13 +30,6 @@ jobs:
           git config --global --get user.name
           git config --global --get user.email
     
-      # Parse Jenkins secrets
-      - name: Parse Jenkins secrets
-        id: parse_secrets
-        run: |
-          echo "JENKINS_USERNAME=$(echo ${{ secrets.JENKINS_SECRETS }} | jq -r '.JENKINS_USERNAME')" >> $GITHUB_ENV
-          echo "JENKINS_API_TOKEN=$(echo ${{ secrets.JENKINS_SECRETS }} | jq -r '.JENKINS_API_TOKEN')" >> $GITHUB_ENV
-
       # Merge feature branch into main after approval
       - name: Merge feature branch into main
         run: |
@@ -50,9 +43,10 @@ jobs:
     
       # Trigger Jenkins job
       - name: Trigger Jenkins job
-        uses: jenkinsci/github-actions-build@v1
-        with:
-          jenkins_url: 'https://localhost:31000'
-          job_name: 'sudokuCI2'
-          user: ${{ env.JENKINS_USERNAME }}
-          token: ${{ env.JENKINS_API_TOKEN }}
+        env:
+          JENKINS_SECRETS: ${{ secrets.JENKINS_SECRETS }}
+        run: |
+          JENKINS_USERNAME=$(echo $JENKINS_SECRETS | jq -r '.JENKINS_USERNAME')
+          JENKINS_API_TOKEN=$(echo $JENKINS_SECRETS | jq -r '.JENKINS_API_TOKEN')
+          curl -X POST "https://localhost:31000/job/sudokuCI2/build" \
+            --user "$JENKINS_USERNAME:$JENKINS_API_TOKEN"
