@@ -38,6 +38,19 @@ spec:
   }
 
   stages {
+    stage('Ensure Docker Daemon') {
+      steps {
+        script {
+          // Check if Docker daemon is running
+          def dockerStatus = sh(script: 'sudo systemctl status docker', returnStatus: true)
+          if (dockerStatus != 0) {
+            // Docker daemon is not running, start it
+            sh 'sudo systemctl start docker'
+          }
+        }
+      }
+    }
+
     stage('Clone Repository') {
       steps {
         container('custom') {
