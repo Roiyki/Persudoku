@@ -4,157 +4,123 @@ pipeline {
             label 'jenkins-slave'
             defaultContainer 'custom'
             yaml """
-apiVersion: v1
-kind: Pod
-spec:
-  serviceAccountName: jenkins-sa
-  containers:
-  - name: custom
-    image: roiyki/inbound-agent:latest
-    command:
-    - cat
-    tty: true
-"""
-        }    
+                apiVersion: v1
+                kind: Pod
+                spec:
+                  serviceAccountName: jenkins-sa
+                  containers:
+                  - name: custom
+                    image: roiyki/inbound-agent-root:latest
+                    command:
+                    - cat
+                    tty: true
+            """
+        }
     }
+
     environment {
-        JENKINS_SECRETS = credentials('jenkins-secrets-json')
+        GITHUB_TOKEN = credentials('github-secret-read-jenkins')
+        GITHUB_USER = 'Roiyki'
+        REPO = 'Roiyki/Persudoku'
+        GIT_CREDENTIALS_ID = 'github-secret-read-jenkins'
     }
 
     stages {
-        stage('Check for Changes') {
+        stage('Setup Git') {
             steps {
-                script {
-                    def githubAPIUrl = "https://api.github.com/repos/Roiyki/Persudoku/commits?sha=main"
-                    def response = httpRequest(
-                        url: githubAPIUrl,
-                        authentication: 'jenkins-secrets-json'
-                    )
+                catchError {
+                    container('custom') {
+                        sh 'git config --global --add safe.directory /home/jenkins/agent/workspace/Persudoku'
+                    }
+                }
+            }
+        }
 
-                    if (response.status == 200) {
-                        // Check if there are any new commits
-                        def commits = readJSON text: response.content
-                        if (commits.size() > 0) {
-                            // Trigger another Jenkins job
-                            build job: 'sudokuCI2', parameters: []
+        stage('Clone and Switch to Feature Branch') {
+            steps {
+                catchError {
+                    container('custom') {
+                        sh '''
+                            cd /home/jenkins/agent/workspace
+                            git clone https://${GITHUB_TOKEN}@github.com/${REPO}.git
+                            cd Persudoku
+                            git fetch origin
+                            if git rev-parse --quiet --verify feature; then
+                                git checkout feature
+                            else
+                                git checkout -b feature
+                            fi
+                            git checkout main -- .
+                            git add .
+                            git pull origin main
+                            git config --global user.email "roiydonagi@gmail.com"
+                            git config --global user.name "Roiyki"
+                            git commit -m "Copy files from main branch to feature branch" || true
+                            git push origin feature
+                        '''
+                    }
+                }
+            }
+        }
+
+        stage('Install Requirements') {
+            steps {
+                catchError {
+                    container('custom') {
+                        dir('/home/jenkins/agent/workspace/Persudoku') {
+                            sh "pip install -r app/Backend/requirements.txt"
                         }
                     }
                 }
             }
         }
-        stage('Setup Git') {
-            steps {
-                container('custom') {
-                    script {
-                        sh 'git config --global --add safe.directory /home/jenkins/agent/workspace/SudokuFeatureCI'
-                    }
-                }
-            }
-        }
-        stage('Clone and Switch to Feature Branch') {
-            steps {
-                container('custom') {
-                    script {
-                        def jenkinsToken = sh(script: 'echo $JENKINS_SECRETS | jq -r ".token"', returnStdout: true).trim()
-                        def jenkinsUser = sh(script: 'echo $JENKINS_SECRETS | jq -r ".user"', returnStdout: true).trim()
-                        
-                        sh """
-                        cd \$HOME
-                        git clone https://${jenkinsUser}:${jenkinsToken}@github.com/Roiyki/Persudoku.git
-                        cd Persudoku
-                        git fetch origin
-                        if git rev-parse --quiet --verify feature; then
-                            git checkout feature
-                        else
-                            git checkout -b feature
-                        fi
-        
-                        git checkout main -- .
-                        git add .
-                        git pull origin main
-                        git config --global user.email "roiydonagi@gmail.com"
-                        git config --global user.name "Roiyki"
-                        git commit -m "Copy files from main branch to feature branch" || true
-                        git push origin feature
-                        """
-                    }
-                }
-            }
-        }
-        stage('Install Dependencies') {
-            steps {
-                container('custom') {
-                    sh "pip install -r app/Backend/requirements.txt"
-                }
-            }
-        }
+
         stage('Run Pytest') {
             steps {
-                container('custom') {
-                    sh "pytest --junitxml=test-results.xml app/tests/test_main.py"
-                }
-            }
-        }
-        stage('Update GitHub Status to Pending') {
-            steps {
-                container('custom') {
-                    script {
-                        def commitHash = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
-                        def jenkinsToken = sh(script: 'echo $JENKINS_SECRETS | jq -r ".token"', returnStdout: true).trim()
-                        def jenkinsUser = sh(script: 'echo $JENKINS_SECRETS | jq -r ".user"', returnStdout: true).trim()
-                        
-                        sh """
-                        curl -X POST \
-                        -u ${jenkinsUser}:${jenkinsToken} \
-                        -H 'Content-Type: application/json' \
-                        -d '{"state": "pending", "description": "Pipeline in progress", "context": "jenkins/manual-approval"}' \
-                        https://api.github.com/repos/Roiyki/Persudoku/statuses/${commitHash}
-                        """
+                catchError {
+                    container('custom') {
+                        dir('/home/jenkins/agent/workspace/Persudoku') {
+                            sh "pytest --junitxml=test-results.xml app/tests/test_main.py"
+                        }
                     }
                 }
             }
         }
+
         stage('Manual Approval') {
+            when {
+                beforeAgent true
+                expression { true }
+            }
             steps {
-                container('custom') {
-                    script {
-                        def manualApprovalGranted = input message: 'Approve deployment to main?', ok: 'Approve'
+                script {
+                    def manualApprovalGranted = input message: 'Approve deployment to main?', ok: 'Approve'
 
-                        if (manualApprovalGranted) {
-                            def commitHash = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
-                            def jenkinsToken = sh(script: 'echo $JENKINS_SECRETS | jq -r ".token"', returnStdout: true).trim()
-                            def jenkinsUser = sh(script: 'echo $JENKINS_SECRETS | jq -r ".user"', returnStdout: true).trim()
-                            
-                            sh """
-                            curl -X POST \
-                            -u ${jenkinsUser}:${jenkinsToken} \
-                            -H 'Content-Type: application/json' \
-                            -d '{"state": "success", "description": "Manual approval granted", "context": "jenkins/manual-approval"}' \
-                            https://api.github.com/repos/Roiyki/Persudoku/statuses/${commitHash}
-                            """
+                    if (manualApprovalGranted) {
+                        container('custom') {
+                            dir('/home/jenkins/agent/workspace/Persudoku') {
+                                def commitHash = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
+                                sh """
+                                curl -X POST \
+                                -u ${GITHUB_USER}:${GITHUB_TOKEN} \
+                                -H 'Content-Type: application/json' \
+                                -d '{"state": "success", "description": "Manual approval granted", "context": "jenkins/manual-approval"}' \
+                                https://api.github.com/repos/${REPO}/statuses/${commitHash}
+                                """
 
-                            sh 'git checkout main'
-                            def featureBranchExists = sh(script: 'git show-ref --verify --quiet refs/heads/feature', returnStatus: true) == 0
-
-                            if (featureBranchExists) {
-                                try {
-                                    sh 'git merge --no-ff feature'
-                                    sh 'git push origin main'
-                                    sh 'git branch -d feature'
-                                } catch (Exception mergeError) {
-                                    echo "Merge failed: ${mergeError}"
-                                    currentBuild.result = 'FAILURE'
-                                    error("Merge failed")
-                                }
-                            } else {
-                                echo "Feature branch does not exist"
-                                currentBuild.result = 'FAILURE'
-                                error("Feature branch does not exist")
+                                sh 'git checkout main'
+                                sh 'git branch -D feature'
+                                sh "git push origin --delete feature"
+                                build job: 'sudokuCI2', parameters: []
                             }
-
-                            build job: 'sudokuCI2', parameters: []
-                        } else {
-                            error("Manual approval not granted")
+                        }
+                    } else {
+                        container('custom') {
+                            dir('/home/jenkins/agent/workspace/Persudoku') {
+                                sh 'git checkout feature'
+                                sh 'git reset --hard HEAD~1'
+                                sh 'git push origin feature --force'
+                            }
                         }
                     }
                 }
