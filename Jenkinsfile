@@ -1,20 +1,20 @@
 pipeline {
     agent {
         kubernetes {
-            label 'jenkins-slave'
+            label 'jenkins-slave-pipeline-a'
             defaultContainer 'custom'
             yaml """
-                apiVersion: v1
-                kind: Pod
-                spec:
-                  serviceAccountName: jenkins-sa
-                  containers:
-                  - name: custom
-                    image: roiyki/inbound-agent-root:latest
-                    command:
-                    - cat
-                    tty: true
-            """
+apiVersion: v1
+kind: Pod
+spec:
+  serviceAccountName: jenkins-sa
+  containers:
+  - name: custom
+    image: roiyki/inbound-agent-root:latest
+    command:
+    - cat
+    tty: true
+"""
         }
     }
 
