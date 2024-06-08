@@ -18,13 +18,13 @@ jobs:
         uses: actions/github-script@v4
         with:
           script: |
-            const { context, github } = require('@actions/github');
-            const { owner, repo } = context.repo;
+            const { ctx, github } = require('@actions/github'); // Renaming 'context' to 'ctx'
+            const { owner, repo } = ctx.repo; // Using 'ctx' instead of 'context'
             const { data: pulls } = await github.pulls.list({
               owner,
               repo,
               state: 'open',
-              head: context.sha
+              head: ctx.sha
             });
 
             if (pulls.length > 0) {
