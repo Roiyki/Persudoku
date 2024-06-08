@@ -61,7 +61,7 @@ spec:
             def dirPath = sh(script: 'find . -type d -name Inboundagent2', returnStdout: true).trim()
 
 
-            sh "docker login -u $DOCKER_HUB_USERNAME -p $DOCKER_HUB_PASSWORD"
+            sh "docker login -u ${DOCKER_HUB_USERNAME} -p ${DOCKER_HUB_PASSWORD}"
             sh "docker build -t ${DOCKER_HUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG} ${dirPath}"
 
 
