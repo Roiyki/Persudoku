@@ -57,8 +57,8 @@ spec:
               withCredentials([usernamePassword(credentialsId: 'docker-credentials', usernameVariable: 'DOCKER_HUB_USERNAME', passwordVariable: 'DOCKER_HUB_PASSWORD')]) {
                 sh "docker login -u $DOCKER_HUB_USERNAME -p $DOCKER_HUB_PASSWORD"
                 def dirPath = sh(script: 'find . -type d -name Inboundagent2', returnStdout: true).trim()
-                sh "docker build -t $DOCKER_HUB_USERNAME/$IMAGE_NAME:$IMAGE_TAG $dirPath"
-                sh "docker push $DOCKER_HUB_USERNAME/$IMAGE_NAME:$IMAGE_TAG"
+                sh "docker build -t roiyki/$IMAGE_NAME:$IMAGE_TAG $dirPath"
+                sh "docker push roiyki/$IMAGE_NAME:$IMAGE_TAG"
               }
             } catch (Exception e) {
               echo "Failed to build and push Docker image: ${e.message}"
