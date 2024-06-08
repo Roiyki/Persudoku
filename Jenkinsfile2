@@ -20,8 +20,11 @@ spec:
     environment {
         GITHUB_TOKEN = credentials('github-secret-read-jenkins')
         GITHUB_USER = credentials('github-secret-read-jenkinsD')
-        DOCKER_HUB_USERNAME = credentials('dockerhub-jenkins-ID')
-        DOCKER_HUB_PASSWORD = credentials('dockerhub-jenkins-ID')
+        DOCKER_HUB_USERNAME = credentials('docker-credentials')
+        DOCKER_HUB_PASSWORD = credentials('docker-credentials')
+        IMAGE_NAME = persudoku-flask
+        IMAGE_TAG = latest
+
     }
     stages {
         stage('Clone Repository') {
