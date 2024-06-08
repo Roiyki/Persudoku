@@ -19,7 +19,7 @@ spec:
     }
     environment {
         GITHUB_TOKEN = credentials('github-secret-read-jenkins')
-        GITHUB_USER = credentials('github-secret-read-jenkinsD')
+        GITHUB_USER = credentials('github-secret-read-jenkins')
         DOCKER_HUB_USERNAME = credentials('docker-credentials')
         DOCKER_HUB_PASSWORD = credentials('docker-credentials')
         IMAGE_NAME = 'persudoku-flask'
