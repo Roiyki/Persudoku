@@ -18,9 +18,9 @@ jobs:
         uses: actions/github-script@v4
         with:
           script: |
-            const { ctx, github } = require('@actions/github'); // Renaming 'context' to 'ctx'
-            const { owner, repo } = ctx.repo; // Using 'ctx' instead of 'context'
-            const { data: pulls } = await github.pulls.list({
+            const { ctx, gh } = require('@actions/github'); // Renaming 'github' to 'gh'
+            const { owner, repo } = ctx.repo; // Using 'ctx' instead of 'github'
+            const { data: pulls } = await gh.pulls.list({ // Using 'gh' instead of 'github'
               owner,
               repo,
               state: 'open',
@@ -29,13 +29,13 @@ jobs:
 
             if (pulls.length > 0) {
               const prNumber = pulls[0].number;
-              await github.pulls.createReview({
+              await gh.pulls.createReview({ // Using 'gh' instead of 'github'
                 owner,
                 repo,
                 pull_number: prNumber,
                 event: 'APPROVE'
               });
-              await github.pulls.merge({
+              await gh.pulls.merge({ // Using 'gh' instead of 'github'
                 owner,
                 repo,
                 pull_number: prNumber
