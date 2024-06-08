@@ -1,7 +1,7 @@
 pipeline {
     agent {
         kubernetes {
-            label 'jenkins-slave-pipeline-b'
+            label 'jenkins-slave-pipeline-2'
             defaultContainer 'maven' // Changed default container to 'maven'
             yaml '''
             apiVersion: v1
