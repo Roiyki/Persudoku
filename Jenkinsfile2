@@ -2,110 +2,54 @@ pipeline {
     agent {
         kubernetes {
             label 'jenkins-slave-pipeline-b'
-            defaultContainer 'custom'
-            yaml """
-                apiVersion: v1
-                kind: Pod
-                spec:
-                  serviceAccountName: jenkins-sa
-                  containers:
-                  - name: custom
-                    image: docker:dind
-                    command:
-                    - cat
-                    tty: true
-                    securityContext:
-                      privileged: true
-                    volumeMounts:
-                    - mountPath: /var/run/docker.sock
-                      name: docker-sock
-                    - mountPath: /home/jenkins/agent
-                      name: workspace-volume
-                      readOnly: false
-                  - name: jnlp
-                    image: "jenkins/inbound-agent:3248.v65ecb_254c298-2"
-                    env:
-                    - name: "JENKINS_SECRET"
-                      value: "********"
-                    - name: "JENKINS_AGENT_NAME"
-                      value: "jenkins-slave-pipeline-b-fkwh8-rbc8w"
-                    - name: "JENKINS_WEB_SOCKET"
-                      value: "true"
-                    - name: "REMOTING_OPTS"
-                      value: "-noReconnectAfter 1d"
-                    - name: "JENKINS_NAME"
-                      value: "jenkins-slave-pipeline-b-fkwh8-rbc8w"
-                    - name: "JENKINS_AGENT_WORKDIR"
-                      value: "/home/jenkins/agent"
-                    - name: "JENKINS_URL"
-                      value: "http://192.168.68.60:31000/"
-                    resources:
-                      requests:
-                        memory: "256Mi"
-                        cpu: "100m"
-                    volumeMounts:
-                    - mountPath: /home/jenkins/agent
-                      name: workspace-volume
-                      readOnly: false
-                  nodeSelector:
-                    kubernetes.io/os: "linux"
-                  restartPolicy: "Never"
-                  serviceAccountName: "jenkins-sa"
-                  volumes:
-                  - hostPath:
-                      path: /var/run/docker.sock
-                    name: docker-sock
-                  - emptyDir:
-                      medium: ""
-                    name: workspace-volume
-            """
+            defaultContainer 'maven' // Changed default container to 'maven'
+            yaml '''
+            apiVersion: v1
+            kind: Pod
+            spec:
+              containers:
+              - name: maven
+                image: maven:alpine
+                command:
+                - cat
+                tty: true
+            '''
         }
     }
 
     environment {
-        GITHUB_TOKEN = credentials('github-secret-read-jenkins')
-        DOCKER_HUB_CREDENTIALS = credentials('docker-credentials')
-        IMAGE_NAME = 'persudoku-flask'
-        IMAGE_TAG = 'latest'
+        DOCKER_IMAGE = "roiyki/persudoku-flask"
+        DOCKERHUB_CREDENTIALS = 'dockerhub-credentials' // Define Docker Hub credentials
     }
 
     stages {
-        stage('Install Git') {
+        stage('Checkout Code') {
             steps {
-                container('custom') {
+                checkout scm
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                container('maven') { // Changed container name to match default container
                     script {
-                        sh 'apk update'
-                        sh 'apk add git'
+                        // Build Docker image
+                        sh "docker build -t ${DOCKER_IMAGE}:latest ./app/backend"
                     }
                 }
             }
         }
-
-        stage('Clone Repository') {
-            steps {
-                container('custom') {
-                    script {
-                        sh 'git clone https://github.com/Roiyki/Persudoku.git'
-                        sh 'cd Persudoku'
-                    }
-                }
+        
+        stage('Push Docker Images') {
+            when {
+                branch 'main'
             }
-        }
-
-        stage('Build and Push Docker Image') {
             steps {
-                container('custom') {
+                container('maven') { // Changed container name to match default container
                     script {
-                        try {
-                            withCredentials([usernamePassword(credentialsId: 'docker-credentials', usernameVariable: 'DOCKER_HUB_USERNAME', passwordVariable: 'DOCKER_HUB_PASSWORD')]) {
-                                sh "docker login -u $DOCKER_HUB_USERNAME -p $DOCKER_HUB_PASSWORD"
-                                def dirPath = sh(script: 'find . -type d -name Inboundagent2', returnStdout: true).trim()
-                                sh "docker build -t roiyki/$IMAGE_NAME:$IMAGE_TAG $dirPath"
-                                sh "docker push roiyki/$IMAGE_NAME:$IMAGE_TAG"
-                            }
-                        } catch (Exception e) {
-                            echo "Failed to build and push Docker image: ${e.message}"
-                            currentBuild.result = 'FAILURE'
+                        withDockerRegistry(credentialsId: "${DOCKERHUB_CREDENTIALS}") {
+                            // Push Docker image
+                            sh "docker push ${DOCKER_IMAGE}:latest"
                         }
                     }
                 }
