@@ -1,7 +1,7 @@
 FROM docker:20.10.10-alpine3.14
 
-# Install Docker
-RUN apk add --no-cache docker
+# Install Docker and Git
+RUN apk add --no-cache docker git
 
 # Create a directory for Docker's runtime files
 RUN mkdir -p /var/run/docker
