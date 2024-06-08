@@ -45,7 +45,7 @@ spec:
             steps {
                 script {
                     // Docker build
-                    sh "docker build -t ${DOCKER_HUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG} ./Inboundagent2/"
+                    sh "docker build -t ${DOCKER_HUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG} ./Persudoku/Inboundagent2"
 
                     // Docker login to Docker Hub
                     sh "docker login -u ${DOCKER_HUB_USERNAME} -p ${DOCKER_HUB_PASSWORD}"
