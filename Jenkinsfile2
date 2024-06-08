@@ -41,7 +41,7 @@ spec:
         container('custom') {
           script {
             // Docker build (assuming Dockerfile is in Persudoku/)
-            sh "docker build -t ${DOCKER_HUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG} ./Persudoku/Inboundagent2"
+            sh "docker build -t ${DOCKER_HUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG} ./Inboundagent2"
 
             // Assuming you have proper credentials defined...
             sh "docker login -u ${DOCKER_HUB_USERNAME} -p ${DOCKER_HUB_PASSWORD}"
