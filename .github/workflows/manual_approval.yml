@@ -10,6 +10,9 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
+      - name: Install dependencies
+        run: npm install @actions/github
+    
       - name: Checkout code
         uses: actions/checkout@v2
     
@@ -18,9 +21,9 @@ jobs:
         uses: actions/github-script@v4
         with:
           script: |
-            const { ctx, gh } = require('@actions/github'); // Renaming 'github' to 'gh'
-            const { owner, repo } = ctx.repo; // Using 'ctx' instead of 'github'
-            const { data: pulls } = await gh.pulls.list({ // Using 'gh' instead of 'github'
+            const { ctx, gh } = require('@actions/github');
+            const { owner, repo } = ctx.repo;
+            const { data: pulls } = await gh.pulls.list({
               owner,
               repo,
               state: 'open',
@@ -29,13 +32,13 @@ jobs:
 
             if (pulls.length > 0) {
               const prNumber = pulls[0].number;
-              await gh.pulls.createReview({ // Using 'gh' instead of 'github'
+              await gh.pulls.createReview({
                 owner,
                 repo,
                 pull_number: prNumber,
                 event: 'APPROVE'
               });
-              await gh.pulls.merge({ // Using 'gh' instead of 'github'
+              await gh.pulls.merge({
                 owner,
                 repo,
                 pull_number: prNumber
