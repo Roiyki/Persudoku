@@ -1,9 +1,9 @@
 pipeline {
-    agent {
-        kubernetes {
-            label 'jenkins-slave' // Assign a label to the pod
-            defaultContainer 'custom'
-            yaml """
+  agent {
+    kubernetes {
+      label 'jenkins-slave' // Assign a label to the pod
+      defaultContainer 'custom'
+      yaml """
 apiVersion: v1
 kind: Pod
 spec:
@@ -15,48 +15,43 @@ spec:
     - cat
     tty: true
 """
-        }
     }
-    environment {
-        GITHUB_TOKEN = credentials('github-secret-read-jenkins')
-        GITHUB_USER = credentials('github-secret-read-jenkins')
-        DOCKER_HUB_USERNAME = credentials('docker-credentials')
-        DOCKER_HUB_PASSWORD = credentials('docker-credentials')
-        IMAGE_NAME = 'persudoku-flask'
-        IMAGE_TAG = 'latest'
-
-    }
-    stages {
-        stage('Clone Repository') {
-            steps {
-                container('custom') {
-                    script {
-                        // Clone the GitHub repository and change directory
-                        sh "git clone https://github.com/Roiyki/Persudoku.git && cd Persudoku"
-
-                        // Use find command to locate Inboundagent2 directory
-                        def inboundAgent2Dir = sh(returnStdout: true, script: 'find . -type d -name Inboundagent2').trim()
-                        echo "Inboundagent2 directory found at: ${inboundAgent2Dir}"
-                    }
-                }
-            }
+  }
+  environment {
+    GITHUB_TOKEN = credentials('github-secret-read-jenkins')
+    GITHUB_USER = credentials('github-secret-read-jenkins')
+    DOCKER_HUB_USERNAME = credentials('docker-credentials')
+    DOCKER_HUB_PASSWORD = credentials('docker-credentials')
+    IMAGE_NAME = 'persudoku-flask'
+    IMAGE_TAG = 'latest'
+  }
+  stages {
+    stage('Clone Repository') {
+      steps {
+        container('custom') {
+          script {
+            // Clone the GitHub repository and change directory
+            sh "git clone https://github.com/Roiyki/Persudoku.git && cd Persudoku"
+          }
         }
-        stage('Build and Push Docker Image') {
-            steps {
-                script {
-                    // Docker build
-                    sh "docker build -t ${DOCKER_HUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG} ./Persudoku/Inboundagent2"
-
-                    // Docker login to Docker Hub
-                    sh "docker login -u ${DOCKER_HUB_USERNAME} -p ${DOCKER_HUB_PASSWORD}"
-
-                    // Docker tag
-                    sh "docker tag ${DOCKER_HUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG} ${DOCKER_HUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG}"
-
-                    // Docker push
-                    sh "docker push ${DOCKER_HUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG}"
-                }
-            }
-        }
+      }
     }
+    stage('Build and Push Docker Image') {
+      steps {
+        container('custom') {
+          script {
+            // Docker build (assuming Dockerfile is in Persudoku/)
+            sh "docker build -t ${DOCKER_HUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG} ./Persudoku/Inboundagent2"
+
+            // Assuming you have proper credentials defined...
+            sh "docker login -u ${DOCKER_HUB_USERNAME} -p ${DOCKER_HUB_PASSWORD}"
+
+            sh "docker tag ${DOCKER_HUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG} ${DOCKER_HUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG}"
+
+            sh "docker push ${DOCKER_HUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG}"
+          }
+        }
+      }
+    }
+  }
 }
