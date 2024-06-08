@@ -11,8 +11,11 @@ jobs:
     
     steps:
       - name: Install dependencies
-        run: npm install @actions/github
-    
+        run: |
+          npm install @actions/github
+          ls -al node_modules/@actions/github # Verify installation
+          cat package-lock.json # Print package-lock.json for debugging
+          
       - name: Checkout code
         uses: actions/checkout@v2
     
