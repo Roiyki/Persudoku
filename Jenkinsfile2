@@ -36,7 +36,7 @@ spec:
     GITHUB_TOKEN = credentials('github-secret-read-jenkins')
     GITHUB_USER = credentials('github-secret-read-jenkins')
     DOCKER_HUB_USERNAME = credentials('docker-credentials')
-    DOCKER_HUB_PASSWORD = credentials('docker-credentials')  # Use credentials plugin for secure storage
+    DOCKER_HUB_PASSWORD = credentials('docker-credentials')
     IMAGE_NAME = 'persudoku-flask'
     IMAGE_TAG = 'latest'
   }
