@@ -10,7 +10,7 @@ pipeline {
                   serviceAccountName: jenkins-sa
                   containers:
                   - name: custom
-                    image: roiyki/inbound-agent2:latest
+                    image: docker:dind
                     command:
                     - cat
                     tty: true
@@ -70,6 +70,17 @@ pipeline {
     }
 
     stages {
+        stage('Install Git') {
+            steps {
+                container('custom') {
+                    script {
+                        sh 'apk update'
+                        sh 'apk add git'
+                    }
+                }
+            }
+        }
+
         stage('Clone Repository') {
             steps {
                 container('custom') {
