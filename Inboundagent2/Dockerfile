@@ -11,3 +11,6 @@ ENV PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 
 # Ensure Docker daemon starts
 CMD ["dockerd"]
+
+# Add Jenkins user to the docker group to grant permissions
+RUN addgroup jenkins docker
