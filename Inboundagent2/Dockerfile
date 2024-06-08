@@ -1,9 +1,13 @@
-# Use Docker as a base image
-FROM docker:20.10.10
+FROM docker:20.10.10-alpine3.14
 
-# Install necessary packages (git, openssh-client, python3-pip) using apt-get
-RUN apk --no-cache add git openssh-client
+# Install Docker
+RUN apk add --no-cache docker
 
-# Set working directory
-WORKDIR /app
+# Create a directory for Docker's runtime files
+RUN mkdir -p /var/run/docker
 
+# Optional: Set the PATH if needed
+ENV PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+
+# Ensure Docker daemon starts
+CMD ["dockerd"]
