@@ -20,40 +20,17 @@ pipeline {
     environment {
         DOCKER_IMAGE = "roiyki/persudoku-flask"
         DOCKERHUB_CREDENTIALS = 'dockerhub-credentials' // Define Docker Hub credentials
+        DOCKERHUB_REGISTRY = 'https://hub.docker.com/roiyki/'
     }
 
     stages {
-        stage('Checkout Code') {
-            steps {
-                checkout scm
-            }
-        }
+        node {
+            checkout scm
+            
+            docker.withRegistry("$DOCKERHUB_REGISTRY", "$DOCKERHUB_CREDENTIALS")
+            def testImage = docker.build("my-image:latest", "-f Dockerfile .app/Backend")
 
-        stage('Build Docker Image') {
-            steps {
-                container('maven') { // Changed container name to match default container
-                    script {
-                        // Build Docker image
-                        sh "docker build -t ${DOCKER_IMAGE}:latest ./app/Backend"
-                    }
-                }
-            }
-        }
-        
-        stage('Push Docker Images') {
-            when {
-                branch 'main'
-            }
-            steps {
-                container('maven') { // Changed container name to match default container
-                    script {
-                        withDockerRegistry(credentialsId: "${DOCKERHUB_CREDENTIALS}") {
-                            // Push Docker image
-                            sh "docker push ${DOCKER_IMAGE}:latest"
-                        }
-                    }
-                }
-            }
+            customImage.push('latest')
         }
     }
 }
