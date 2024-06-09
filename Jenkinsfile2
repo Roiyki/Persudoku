@@ -1,18 +1,25 @@
 pipeline {
     agent {
         kubernetes {
-            label 'jenkins-slave-pipeline-2'
-            defaultContainer 'maven' // Changed default container to 'maven'
+            label 'jenkins-slave-pipeline-b'
+            defaultContainer 'docker' // Use a container with Docker installed
             yaml '''
             apiVersion: v1
             kind: Pod
             spec:
               containers:
-              - name: maven
-                image: maven:alpine
+              - name: docker
+                image: docker:19.03.12
                 command:
                 - cat
                 tty: true
+                volumeMounts:
+                - name: docker-sock
+                  mountPath: /var/run/docker.sock
+              volumes:
+              - name: docker-sock
+                hostPath:
+                  path: /var/run/docker.sock
             '''
         }
     }
@@ -31,7 +38,7 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                container('maven') { // Changed container name to match default container
+                container('docker') { // Use the Docker container
                     script {
                         // Build Docker image
                         sh "docker build -t ${DOCKER_IMAGE}:latest ./app/backend"
@@ -39,13 +46,13 @@ pipeline {
                 }
             }
         }
-        
+
         stage('Push Docker Images') {
             when {
                 branch 'main'
             }
             steps {
-                container('maven') { // Changed container name to match default container
+                container('docker') { // Use the Docker container
                     script {
                         withDockerRegistry(credentialsId: "${DOCKERHUB_CREDENTIALS}") {
                             // Push Docker image
