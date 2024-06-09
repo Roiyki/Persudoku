@@ -1,25 +1,18 @@
 pipeline {
     agent {
         kubernetes {
-            label 'jenkins-slave-pipeline-b'
-            defaultContainer 'docker' // Use a container with Docker installed
+            label 'jenkins-slave-pipeline-2'
+            defaultContainer 'maven' // Changed default container to 'maven'
             yaml '''
             apiVersion: v1
             kind: Pod
             spec:
               containers:
-              - name: docker
-                image: docker:19.03.12
+              - name: maven
+                image: maven:alpine
                 command:
                 - cat
                 tty: true
-                volumeMounts:
-                - name: docker-sock
-                  mountPath: /var/run/docker.sock
-              volumes:
-              - name: docker-sock
-                hostPath:
-                  path: /var/run/docker.sock
             '''
         }
     }
@@ -32,60 +25,35 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
-                echo 'Checking out code...'
                 checkout scm
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                container('docker') { // Use the Docker container
+                container('maven') { // Changed container name to match default container
                     script {
-                        echo 'Building Docker image...'
-                        sh "find / -name Backend"
+                        // Build Docker image
                         sh "docker build -t ${DOCKER_IMAGE}:latest ./app/Backend"
                     }
                 }
             }
         }
-
+        
         stage('Push Docker Images') {
             when {
                 branch 'main'
             }
             steps {
-                container('docker') { // Use the Docker container
+                container('maven') { // Changed container name to match default container
                     script {
-                        echo 'Pushing Docker image to registry...'
                         withDockerRegistry(credentialsId: "${DOCKERHUB_CREDENTIALS}") {
+                            // Push Docker image
                             sh "docker push ${DOCKER_IMAGE}:latest"
                         }
                     }
                 }
             }
-        }
-        
-        stage('Cleanup') {
-            steps {
-                container('docker') {
-                    script {
-                        echo 'Cleaning up...'
-                        sh 'docker system prune -f'
-                    }
-                }
-            }
-        }
-    }
-
-    post {
-        always {
-            echo 'Pipeline completed.'
-        }
-        success {
-            echo 'Pipeline succeeded.'
-        }
-        failure {
-            echo 'Pipeline failed.'
         }
     }
 }
