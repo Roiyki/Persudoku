@@ -19,7 +19,7 @@ pipeline {
 
     environment {
         DOCKER_IMAGE = "roiyki/persudoku-flask"
-        DOCKERHUB_CREDENTIALS = 'dockerhub-credentials' // Define Docker Hub credentials
+        DOCKERHUB_CREDENTIALS = 'docker-credentials' // Define Docker Hub credentials
         DOCKERHUB_REGISTRY = 'https://hub.docker.com/roiyki/'
     }
 
