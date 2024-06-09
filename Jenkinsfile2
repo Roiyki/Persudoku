@@ -32,6 +32,7 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
+                echo 'Checking out code...'
                 checkout scm
             }
         }
@@ -40,7 +41,8 @@ pipeline {
             steps {
                 container('docker') { // Use the Docker container
                     script {
-                        // Build Docker image
+                        echo 'Building Docker image...'
+                        sh "find / -name backend"
                         sh "docker build -t ${DOCKER_IMAGE}:latest ./app/backend"
                     }
                 }
@@ -54,13 +56,36 @@ pipeline {
             steps {
                 container('docker') { // Use the Docker container
                     script {
+                        echo 'Pushing Docker image to registry...'
                         withDockerRegistry(credentialsId: "${DOCKERHUB_CREDENTIALS}") {
-                            // Push Docker image
                             sh "docker push ${DOCKER_IMAGE}:latest"
                         }
                     }
                 }
             }
+        }
+        
+        stage('Cleanup') {
+            steps {
+                container('docker') {
+                    script {
+                        echo 'Cleaning up...'
+                        sh 'docker system prune -f'
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Pipeline completed.'
+        }
+        success {
+            echo 'Pipeline succeeded.'
+        }
+        failure {
+            echo 'Pipeline failed.'
         }
     }
 }
