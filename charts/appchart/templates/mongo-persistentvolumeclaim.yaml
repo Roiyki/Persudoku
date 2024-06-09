@@ -5,9 +5,9 @@ metadata:
   name: mongo-pvc
   namespace: mongo-namespace
 spec:
+  storageClassName: standard
   accessModes:
-    - {{ .Values.mongo.persistence.accessMode }}
+    - ReadWriteOnce
   resources:
     requests:
-      storage: {{ .Values.mongo.persistence.size }}
-  storageClassName: {{ .Values.mongo.persistence.storageClass }}
+      storage: 10Gi

@@ -4,11 +4,13 @@ kind: PersistentVolume
 metadata:
   name: mongo-pv
   namespace: mongo-namespace
+  labels:
+  type: local
 spec:
   capacity:
-    storage: {{ .Values.mongo.persistence.size }}
+    storage: 10Gi
   accessModes:
-    - {{ .Values.mongo.persistence.accessMode }}
-  storageClassName: {{ .Values.mongo.persistence.storageClass }}
+    - ReadWriteOnce
+  storageClassName: standard
   hostPath:
     path: "/data/pv-data/mongodb"  # Replace with your host directory for volume storage

@@ -23,11 +23,20 @@ mongo:
   service:
     type: ClusterIP
     port: 27017
-  persistence:
-    enabled: true
-    size: 1Gi
-    accessMode: ReadWriteOnce
-    storageClass: standard
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "500m"
+    limits:
+      memory: "2Gi"
+      cpu: "2"
+  volumeMounts:
+    - name: mongo-data
+      mountPath: /data/db
+  volumes:
+    - name: mongo-data
+      persistentVolumeClaim:
+        claimName: mongo-pvc
 
 ingress:
   enabled: false

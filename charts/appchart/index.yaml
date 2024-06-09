@@ -3,12 +3,12 @@ entries:
   appchart:
   - apiVersion: v2
     appVersion: 1.16.0
-    created: "2024-05-31T15:54:48.8003001+03:00"
+    created: "2024-06-09T17:51:56.0385643+03:00"
     description: A Helm chart for deploying a Flask application
-    digest: 9cd6def0426079084c6af1404001e337ce8338c01412972bd70a274e659187e2
+    digest: e9ce69a795d7b43c88821996573bb67268ea09ddd40e067997053c13e85a8e64
     name: appchart
     type: application
     urls:
     - appchart-0.1.0.tgz
     version: 0.1.0
-generated: "2024-05-31T15:54:48.7969202+03:00"
+generated: "2024-06-09T17:51:56.0294106+03:00"
