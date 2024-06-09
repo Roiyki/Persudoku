@@ -38,6 +38,13 @@ mongo:
       persistentVolumeClaim:
         claimName: mongo-pvc
 
+persistence:
+  enabled: true
+  storageClass: "standard"  # Adjust according to your storage class
+  accessMode: ReadWriteOnce
+  size: 10Gi
+
+
 ingress:
   enabled: false
 
