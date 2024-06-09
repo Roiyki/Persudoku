@@ -28,9 +28,9 @@ spec:
         volumeMounts:
         - name: grafana-storage
           mountPath: /var/lib/grafana
-        securityContext:  # Adding security context
+        securityContext:
           runAsUser: 472
-          fsGroup: 472  # Replace with appropriate group ID
+          fsGroup: 472
       volumes:
       - name: grafana-storage
         persistentVolumeClaim:

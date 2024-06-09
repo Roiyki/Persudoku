@@ -4,7 +4,7 @@ prometheus:
   service:
     type: NodePort
     port: 9090
-    targetport: 9090
+    targetPort: 9090  # Ensure capitalization consistency
     nodePort: 32100
   persistence:
     enabled: true
@@ -22,7 +22,7 @@ grafana:
   service:
     type: NodePort
     port: 3000
-    targetPort: 3000
+    targetPort: 3000  # Ensure capitalization consistency
     nodePort: 32200
   persistence:
     enabled: true
@@ -31,6 +31,7 @@ grafana:
     size: 1Gi
   ingress:
     enabled: false
+
 
 # Define storage classes if they are not provided by default
 storageClass:

@@ -8,5 +8,6 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 1Gi  # Adjust the size as needed
+      storage: 1Gi
+  storageClassName: standard
   volumeName: grafana-pv
