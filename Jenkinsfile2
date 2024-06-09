@@ -2,7 +2,7 @@ pipeline {
     agent {
         kubernetes {
             label 'jenkins-slave-pipeline-2'
-            defaultContainer 'maven' // Changed default container to 'maven'
+            defaultContainer 'maven'
             yaml '''
             apiVersion: v1
             kind: Pod
@@ -24,13 +24,33 @@ pipeline {
     }
 
     stages {
-        node {
-            checkout scm
-            
-            docker.withRegistry("$DOCKERHUB_REGISTRY", "$DOCKERHUB_CREDENTIALS")
-            def testImage = docker.build("my-image:latest", "-f Dockerfile .app/Backend")
+        stage('Checkout Code') {
+            steps {
+                checkout scm
+            }
+        }
 
-            customImage.push('latest')
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    docker.withRegistry("$DOCKERHUB_REGISTRY", "$DOCKERHUB_CREDENTIALS") {
+                        def testImage = docker.build("${DOCKER_IMAGE}:latest", "-f Dockerfile .app/backend")
+                        testImage.push('latest')
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Pipeline completed.'
+        }
+        success {
+            echo 'Pipeline succeeded.'
+        }
+        failure {
+            echo 'Pipeline failed.'
         }
     }
 }
