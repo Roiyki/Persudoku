@@ -11,8 +11,8 @@ print("Template Folder:", template_folder)
 app = Flask(__name__, template_folder=template_folder)
 
 # Update MongoDB URI to use the Docker service name
-# app.config['MONGO_URI'] = os.environ.get('MONGO_URI', 'mongodb://mongo-service.mongo-namespace:27017/sudoku_app')
-app.config['MONGO_URI'] = os.environ.get('MONGO_URI', 'mongodb://localhost:27017/sudoku_app_test')
+app.config['MONGO_URI'] = os.environ.get('MONGO_URI', 'mongodb://mongo-service.mongo-namespace:27017/sudoku_app')
+# app.config['MONGO_URI'] = os.environ.get('MONGO_URI', 'mongodb://localhost:27017/sudoku_app_test')
 mongo = PyMongo(app)  # Initialize PyMongo instance
 
 # Initialize the global grid and other variables
