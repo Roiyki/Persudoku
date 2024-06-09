@@ -1,0 +1,181 @@
+---
+# Source: appchart/templates/mongo-namespace.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mongo-namespace
+---
+# Source: appchart/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: my-service-account
+  labels:
+    helm.sh/chart: appchart-0.1.0
+    app.kubernetes.io/name: appchart
+    app.kubernetes.io/instance: persudoku
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    key1: value1
+    key2: value2
+automountServiceAccountToken: true
+---
+# Source: appchart/templates/docker-regcred.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: regcred
+type: kubernetes.io/dockerconfigjson
+data:
+    .dockerconfigjson: |
+        ewoJImF1dGhzIjogewoJCSJodHRwczovL2luZGV4LmRvY2tlci5pby92MS8iOiB7fQoJfSwKCSJj
+        cmVkc1N0b3JlIjogImRlc2t0b3AiLAoJImN1cnJlbnRDb250ZXh0IjogImRlZmF1bHQiLAoJInBs
+        dWdpbnMiOiB7CgkJIi14LWNsaS1oaW50cyI6IHsKCQkJImVuYWJsZWQiOiAidHJ1ZSIKCQl9Cgl9Cn0=
+---
+# Source: appchart/templates/mongo-persistentvolume.yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mongo-pv
+  namespace: mongo-namespace
+  labels:
+    type: local
+spec:
+  storageClassName: standard
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/data/pv-data/mongodb"
+---
+# Source: appchart/templates/mongo-persistentvolumeclaim.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongo-pvc
+  namespace: mongo-namespace
+spec:
+  storageClassName: standard
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+# Source: appchart/templates/deployment.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: persudoku-flask
+  labels:
+    app: persudoku-flask
+spec:
+  type: NodePort
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
+      nodePort: 30000
+  selector:
+    app: persudoku-flask
+---
+# Source: appchart/templates/mongo-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-service
+  namespace: mongo-namespace
+spec:
+  selector:
+    app: mongo
+  ports:
+    - protocol: TCP
+      port: 27017
+      targetPort: 27017
+---
+# Source: appchart/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: persudoku-flask
+  labels:
+    app: persudoku-flask
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: persudoku-flask
+  template:
+    metadata:
+      labels:
+        app: persudoku-flask
+    spec:
+      containers:
+        - name: flask
+          image: "roiyki/persudoku-flask:latest"
+          ports:
+            - containerPort: 5000
+          imagePullPolicy: Always # Ensure image is always pulled
+          # Add volume mounts if needed
+      imagePullSecrets: # Add this section
+        - name: regcred # Name of your Docker registry secret
+      # Add volumes if needed
+---
+# Source: appchart/templates/mongo-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo-deployment
+  namespace: mongo-namespace
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongo
+  template:
+    metadata:
+      labels:
+        app: mongo
+    spec:
+      containers:
+        - name: mongo
+          image: mongo:4.4
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - name: mongo-data
+              mountPath: /data/db
+          resources:
+            requests:
+              memory: 512Mi
+              cpu: "500m"
+            limits:
+              memory: 2Gi
+              cpu: "2"
+      volumes:
+        - name: mongo-data
+          persistentVolumeClaim:
+            claimName: mongo-pvc
+---
+# Source: appchart/templates/tests/test-connection.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "persudoku-appchart-test-connection"
+  labels:
+    helm.sh/chart: appchart-0.1.0
+    app.kubernetes.io/name: appchart
+    app.kubernetes.io/instance: persudoku
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['persudoku-appchart:5000']
+  restartPolicy: Never
