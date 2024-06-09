@@ -39,7 +39,7 @@ pipeline {
             steps { 
                 container('slave') {
                     script {
-                        def image = docker.build("mikey8520/final-project", "./app/Backend")
+                        def image = docker.build("roiyki/persudoku-flask", "./app/Backend")
                         withDockerRegistry(credentialsId: 'docker-credentials') {
                             image.push("${env.BUILD_NUMBER}")
                             image.push("latest")
