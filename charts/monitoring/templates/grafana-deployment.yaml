@@ -1,4 +1,3 @@
-# Kubernetes Deployment manifest for Grafana
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -14,6 +13,13 @@ spec:
       labels:
         app: grafana
     spec:
+      initContainers:
+      - name: grafana-init
+        image: busybox
+        command: ['sh', '-c', 'chown -R 472:472 /var/lib/grafana']
+        volumeMounts:
+        - name: grafana-storage
+          mountPath: /var/lib/grafana
       containers:
       - name: grafana
         image: grafana/grafana

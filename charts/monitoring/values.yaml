@@ -40,3 +40,42 @@ storageClass:
 # Service account settings
 serviceAccount:
   create: false
+
+# Kubernetes Deployment manifest for Grafana
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+  namespace: monitoring-namespace
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      initContainers:
+      - name: grafana-init
+        image: busybox
+        command: ['sh', '-c', 'chown -R 472:472 /var/lib/grafana']
+        volumeMounts:
+        - name: grafana-storage
+          mountPath: /var/lib/grafana
+      containers:
+      - name: grafana
+        image: grafana/grafana
+        ports:
+        - containerPort: 3000
+        volumeMounts:
+        - name: grafana-storage
+          mountPath: /var/lib/grafana
+        securityContext:  # Adding security context
+          runAsUser: 472
+          fsGroup: 472  # Replace with appropriate group ID
+      volumes:
+      - name: grafana-storage
+        persistentVolumeClaim:
+          claimName: grafana-pvc
