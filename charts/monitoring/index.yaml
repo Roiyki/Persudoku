@@ -3,12 +3,12 @@ entries:
   monitoring:
   - apiVersion: v2
     appVersion: 1.16.0
-    created: "2024-06-09T23:48:15.363992+03:00"
+    created: "2024-06-10T00:07:13.5652036+03:00"
     description: A Helm chart for deploying Prometheus and Grafana for monitoring
-    digest: 1d7d8693363e96db457b1fb74284ce00ad419fd85243f294f6319ca79d26ceb5
+    digest: 692adbdaa183cbc100531e18257fd3c4d4358f971e999e4db87ff89f8205b24f
     name: monitoring
     type: application
     urls:
     - monitoring-0.1.0.tgz
     version: 0.1.0
-generated: "2024-06-09T23:48:15.3554391+03:00"
+generated: "2024-06-10T00:07:13.5615164+03:00"

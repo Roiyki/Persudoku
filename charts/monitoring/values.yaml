@@ -15,22 +15,6 @@ prometheus:
     create: true
   ingress:
     enabled: false
-
-# Updated Grafana configuration
-grafana:
-  enabled: true
-  service:
-    type: NodePort
-    port: 3000
-    targetPort: 3000  # Ensure capitalization consistency
-    nodePort: 32200
-  persistence:
-    enabled: true
-    storageClass: standard
-    accessMode: ReadWriteOnce
-    size: 1Gi
-  ingress:
-    enabled: false
   additionalScrapeConfigs: |-
     - job_name: 'kubernetes-pods'
       kubernetes_sd_configs:
@@ -54,6 +38,22 @@ grafana:
       - source_labels: [__meta_kubernetes_pod_name]
         action: replace
         target_label: kubernetes_pod_name
+
+# Updated Grafana configuration
+grafana:
+  enabled: true
+  service:
+    type: NodePort
+    port: 3000
+    targetPort: 3000  # Ensure capitalization consistency
+    nodePort: 32200
+  persistence:
+    enabled: true
+    storageClass: standard
+    accessMode: ReadWriteOnce
+    size: 1Gi
+  ingress:
+    enabled: false
 
 # Define storage classes if they are not provided by default
 storageClass:
