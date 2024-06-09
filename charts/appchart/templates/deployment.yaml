@@ -19,7 +19,10 @@ spec:
           image: "{{ .Values.flask.image.repository }}:{{ .Values.flask.image.tag }}"
           ports:
             - containerPort: 5000
+          imagePullPolicy: Always # Ensure image is always pulled
           # Add volume mounts if needed
+      imagePullSecrets: # Add this section
+        - name: {{ .Values.flask.image.secretName }} # Name of your Docker registry secret
       # Add volumes if needed
 
 ---

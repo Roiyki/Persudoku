@@ -7,6 +7,7 @@ flask:
     repository: roiyki/persudoku-flask
     pullPolicy: IfNotPresent
     tag: "latest"
+    secretName: regcred
   service:
     type: NodePort
     port: 5000
