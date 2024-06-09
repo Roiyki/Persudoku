@@ -24,24 +24,18 @@ pipeline {
     }
 
     stages {
-        stage('Run on Node') {
+        stage('Checkout Code') {
             steps {
-                node {
-                    stage('Checkout Code') {
-                        steps {
-                            checkout scm
-                        }
-                    }
+                checkout scm
+            }
+        }
 
-                    stage('Build Docker Image') {
-                        steps {
-                            script {
-                                docker.withRegistry("$DOCKERHUB_REGISTRY", "$DOCKERHUB_CREDENTIALS") {
-                                    def testImage = docker.build("${DOCKER_IMAGE}:latest", "-f Dockerfile .app/backend")
-                                    testImage.push('latest')
-                                }
-                            }
-                        }
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    docker.withRegistry("$DOCKERHUB_REGISTRY", "$DOCKERHUB_CREDENTIALS") {
+                        def testImage = docker.build("${DOCKER_IMAGE}:latest", "-f Dockerfile .app/Backend")
+                        testImage.push('latest')
                     }
                 }
             }
