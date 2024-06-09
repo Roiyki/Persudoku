@@ -23,24 +23,25 @@ pipeline {
             '''
         }
     }
-
+     environment {
+        DOCKER_IMAGE = "roiyki/persudoku-flask"
+        DOCKERHUB_CREDENTIALS = 'dockerhub-credentials' // Define Docker Hub credentials
+        DOCKERHUB_REGISTRY = 'https://hub.docker.com/roiyki/'
+    }
     stages {
         stage('Run on Node') {
             steps {
-                node {
-                    stage('Checkout Code') {
-                        steps {
-                            checkout scm
-                        }
+                 stage('Checkout Code') {
+                    steps {
+                        checkout scm
                     }
-
-                    stage('Build Docker Image') {
-                        steps {
-                            script {
-                                docker.withRegistry("$DOCKERHUB_REGISTRY", "$DOCKERHUB_CREDENTIALS") {
-                                    def testImage = docker.build("${DOCKER_IMAGE}:latest", "-f Dockerfile .app/backend")
-                                    testImage.push('latest')
-                                }
+                }
+                stage('Build Docker Image') {
+                    steps {
+                        script {
+                            docker.withRegistry("$DOCKERHUB_REGISTRY", "$DOCKERHUB_CREDENTIALS") {
+                                def testImage = docker.build("${DOCKER_IMAGE}:latest", "-f Dockerfile .app/backend")
+                                testImage.push('latest')
                             }
                         }
                     }
@@ -48,7 +49,6 @@ pipeline {
             }
         }
     }
-
     post {
         always {
             echo 'Pipeline completed.'
