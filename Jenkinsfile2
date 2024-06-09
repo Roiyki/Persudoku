@@ -42,8 +42,8 @@ pipeline {
                 container('docker') { // Use the Docker container
                     script {
                         echo 'Building Docker image...'
-                        sh "find / -name backend"
-                        sh "docker build -t ${DOCKER_IMAGE}:latest ./app/backend"
+                        sh "find / -name Backend"
+                        sh "docker build -t ${DOCKER_IMAGE}:latest ./app/Backend"
                     }
                 }
             }
