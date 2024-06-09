@@ -1,3 +1,4 @@
+# Updated Prometheus configuration
 prometheus:
   enabled: true
   service:
@@ -9,31 +10,33 @@ prometheus:
     enabled: true
     storageClass: standard
     accessMode: ReadWriteOnce
-    size: 1Gi  # Adjust the size as needed
+    size: 1Gi
   rbac:
     create: true
   ingress:
-    enabled: false  # If you want to expose Prometheus via Ingress, set this to true
+    enabled: false
 
+# Updated Grafana configuration
 grafana:
   enabled: true
   service:
     type: NodePort
-    port: 3000  # Specify the port here
-    targetPort: 3000  # Corrected field name
+    port: 3000
+    targetPort: 3000
     nodePort: 32200
   persistence:
     enabled: true
     storageClass: standard
     accessMode: ReadWriteOnce
-    size: 1Gi  # Adjust the size as needed
+    size: 1Gi
   ingress:
-    enabled: false  # If you want to expose Grafana via Ingress, set this to true
+    enabled: false
 
 # Define storage classes if they are not provided by default
 storageClass:
   prometheus: standard
   grafana: standard
 
+# Service account settings
 serviceAccount:
-  create: false # or false, depending on your needs
+  create: false
