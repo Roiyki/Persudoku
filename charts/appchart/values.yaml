@@ -1,4 +1,3 @@
-# Default values for your Helm chart
 replicaCount:
   flask: 1
   mongodb: 1
@@ -40,10 +39,9 @@ mongo:
 
 persistence:
   enabled: true
-  storageClass: "standard"  # Adjust according to your storage class
+  storageClass: "standard"
   accessMode: ReadWriteOnce
   size: 10Gi
-
 
 ingress:
   enabled: false

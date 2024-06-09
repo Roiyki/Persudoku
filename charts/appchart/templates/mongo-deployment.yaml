@@ -4,7 +4,7 @@ metadata:
   name: mongo-deployment
   namespace: mongo-namespace
 spec:
-  replicas: {{ .Values.replicaCount.mongodb }}
+  replicas: 1
   selector:
     matchLabels:
       app: mongo
@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: mongo
-          image: "{{ .Values.mongo.image.repository }}:{{ .Values.mongo.image.tag }}"
+          image: mongo:4.4
           ports:
             - containerPort: 27017
           volumeMounts:
@@ -26,8 +26,8 @@ spec:
               memory: 512Mi
               cpu: "500m"
             limits:
-              memory: "2Gi"
-              cpu: "2"
+              memory: 2Gi
+              cpu: 2
       volumes:
         - name: mongo-data
           persistentVolumeClaim:

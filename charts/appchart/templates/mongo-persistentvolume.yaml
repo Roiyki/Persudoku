@@ -1,11 +1,10 @@
-# persistentvolume.yaml
 apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: mongo-pv
   namespace: mongo-namespace
   labels:
-  type: local
+    type: local
 spec:
   storageClassName: standard
   capacity:
@@ -13,4 +12,4 @@ spec:
   accessModes:
     - ReadWriteOnce
   hostPath:
-    path: "/data/pv-data/mongodb"  # Make sure this directory exists on your host
+    path: "/data/pv-data/mongodb"
