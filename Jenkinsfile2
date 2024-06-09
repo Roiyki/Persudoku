@@ -2,64 +2,62 @@ pipeline {
     agent {
         kubernetes {
             label 'jenkins-slave-pipeline-2'
-            defaultContainer 'docker'
             yaml '''
             apiVersion: v1
             kind: Pod
             spec:
-              containers:
-              - name: docker
-                image: docker:19.03.12
-                command:
-                - cat
-                tty: true
-                volumeMounts:
-                - name: docker-sock
-                  mountPath: /var/run/docker.sock
-              volumes:
-              - name: docker-sock
-                hostPath:
-                  path: /var/run/docker.sock
+                serviceAccount: jenkins-sa
+                containers:
+                  - name: slave
+                    image: docker:latest
+                    tty: true
+                    securityContext:  # This section grants privileged access
+                        privileged: true
+                  - name: maven
+                    image: maven:alpine
+                    command:
+                    - cat
+                    tty: true
             '''
         }
     }
 
-    environment {
-        DOCKER_IMAGE = "roiyki/persudoku-flask"
-        DOCKERHUB_CREDENTIALS = 'docker-credentials' // Define Docker Hub credentials
-     }
-
     stages {
-        stage('Checkout Code') {
+        stage('checkout git') {
             steps {
-                checkout scm
+                script {
+                    checkout scm
+                }
             }
         }
 
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    // Navigate to the directory containing the Dockerfile
-                    dir('/Persudoku/app/Backend') {
-                        docker.withRegistry("$DOCKERHUB_CREDENTIALS") {
-                            def testImage = docker.build("${DOCKER_IMAGE}:latest", ".")
-                            testImage.push('latest')
+        // Build and push with build tag (replace with actual build commands)
+        stage('Build and Push the image with tags') {
+            environment {
+                auth = 'dockerauth'
+            }
+            steps { 
+                container('slave') {
+                    script {
+                        def image = docker.build("mikey8520/final-project", "./app/Backend")
+                        withDockerRegistry(credentialsId: 'docker-credentials') {
+                            image.push("${env.BUILD_NUMBER}")
+                            image.push("latest")
                         }
                     }
                 }
             }
         }
     }
-
     post {
         always {
-            echo 'Pipeline completed.'
+            echo 'Pipeline POST:'
         }
         success {
-            echo 'Pipeline succeeded.'
+            echo 'Pipeline SUCCESS!'
         }
         failure {
-            echo 'Pipeline failed.'
+            echo 'Pipeline FAILED, check the logs for more information!'
         }
     }
 }
