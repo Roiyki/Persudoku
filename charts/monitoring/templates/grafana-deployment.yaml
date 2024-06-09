@@ -23,6 +23,7 @@ spec:
         - name: grafana-storage
           mountPath: /var/lib/grafana
         securityContext:  # Adding security context
+          runAsUser: 472
           fsGroup: 472  # Replace with appropriate group ID
       volumes:
       - name: grafana-storage
