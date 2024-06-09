@@ -40,7 +40,7 @@ pipeline {
             steps {
                 script {
                     // Navigate to the directory containing the Dockerfile
-                    dir('Backend') {
+                    dir('Persudoku/app/Backend') {
                         docker.withRegistry("$DOCKERHUB_CREDENTIALS") {
                             def testImage = docker.build("${DOCKER_IMAGE}:latest", ".")
                             testImage.push('latest')
