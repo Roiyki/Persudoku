@@ -27,7 +27,6 @@ pipeline {
     environment {
         DOCKER_IMAGE = "roiyki/persudoku-flask"
         DOCKERHUB_CREDENTIALS = 'docker-credentials' // Define Docker Hub credentials
-        DOCKERHUB_REGISTRY = 'https://hub.docker.com/r/roiyki/persudoku-flask'
     }
 
     stages {
@@ -40,7 +39,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    docker.withRegistry("$DOCKERHUB_REGISTRY", "$DOCKERHUB_CREDENTIALS") {
+                    docker.withRegistry("$DOCKERHUB_CREDENTIALS") {
                         def testImage = docker.build("${DOCKER_IMAGE}:latest", "-f Dockerfile .app/Backend")
                         testImage.push('latest')
                     }
