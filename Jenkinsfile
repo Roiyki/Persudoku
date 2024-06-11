@@ -23,7 +23,7 @@ spec:
         GITHUB_USER = 'Roiyki'
         REPO = 'Roiyki/Persudoku'
         GIT_CREDENTIALS_ID = 'github-secret-read-jenkins'
-        MONGO_URI = 'mongodb://mongo:27017/sudoku_app_test'
+        MONGO_URI = 'mongodb://mongo-service.mongo-namespace:27017/sudoku_app'
     }
 
     stages {
