@@ -14,10 +14,6 @@ spec:
     command:
     - cat
     tty: true
-  - name: mongo
-    image: mongo:latest
-    ports:
-    - containerPort: 27017
 """
         }
     }

@@ -9,7 +9,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 from app.Backend.main import app
 
 # Define the MongoDB URI for testing
-TEST_MONGO_URI = 'mongodb://localhost:27017/sudoku_app'  # Update URI to use Docker service name
+TEST_MONGO_URI = 'mongodb://mongo-service.mongo-namespace:27017/sudoku_app'  # Update URI to use Docker service name
 
 @pytest.fixture
 def client():
