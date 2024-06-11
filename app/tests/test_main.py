@@ -9,7 +9,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 from app.Backend.main import app
 
 # Define the MongoDB URI for testing
-TEST_MONGO_URI = 'mongodb://localhost:27017/sudoku_app_test'
+TEST_MONGO_URI = 'mongodb://mongo:27017/sudoku_app_test'  # Update URI to use Docker service name
 
 @pytest.fixture
 def client():
@@ -79,7 +79,8 @@ def test_registration_another_user(client):
     assert response.headers['Location'] == '/login'  # Ensure it redirects to the relative login page
 
     # Ensure that the user data is stored in the database
-    user = mongo.db.users.find_one({'email': 'anotheruser@example.com'})
+    client = MongoClient(TEST_MONGO_URI)  # Reconnect to the MongoDB using the test URI
+    user = client.sudoku_app_test.users.find_one({'email': 'anotheruser@example.com'})  # Access the users collection
     assert user is not None
     assert user['full_name'] == 'Another User'
     assert user['email'] == 'anotheruser@example.com'
