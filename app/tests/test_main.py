@@ -80,7 +80,8 @@ def test_registration_another_user(client):
 
     # Ensure that the user data is stored in the database
     client = MongoClient(TEST_MONGO_URI)  # Reconnect to the MongoDB using the test URI
-    user = client.sudoku_app_test.users.find_one({'email': 'anotheruser@example.com'})  # Access the users collection
+    db = client.get_database()
+    user = db.users.find_one({'email': 'anotheruser@example.com'})  # Access the users collection
     assert user is not None
     assert user['full_name'] == 'Another User'
     assert user['email'] == 'anotheruser@example.com'
