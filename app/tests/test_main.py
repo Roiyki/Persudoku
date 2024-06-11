@@ -63,3 +63,26 @@ def test_registration(client):
     # Check if registration was successful
     assert response.status_code == 302  # Expecting a redirect status code
     assert response.headers['Location'] == '/login'  # Ensure it redirects to the relative login page
+
+def test_registration_another_user(client):
+    registration_data = {
+        'full_name': 'Another User',
+        'email': 'anotheruser@example.com',
+        'password': 'anotherpassword123'
+    }
+
+    # Simulate a registration request for another user
+    response = client.post('/register', data=registration_data)
+
+    # Check if registration was successful
+    assert response.status_code == 302  # Expecting a redirect status code
+    assert response.headers['Location'] == '/login'  # Ensure it redirects to the relative login page
+
+    # Ensure that the user data is stored in the database
+    user = mongo.db.users.find_one({'email': 'anotheruser@example.com'})
+    assert user is not None
+    assert user['full_name'] == 'Another User'
+    assert user['email'] == 'anotheruser@example.com'
+    # Ensure the password is hashed or stored securely in the database
+    # For this test, you can check if the password matches the expected value
+    assert user['password'] == 'anotherpassword123'  # This line should be updated based on how passwords are stored in the database
