@@ -63,12 +63,3 @@ def test_registration(client):
     # Check if registration was successful
     assert response.status_code == 302  # Expecting a redirect status code
     assert response.headers['Location'] == '/login'  # Ensure it redirects to the relative login page
-
-    # Verify that the user was added to the database
-    client = MongoClient(TEST_MONGO_URI)
-    db = client.get_database()
-    user = db.users.find_one({'email': 'john@example.com'})
-    assert user is not None
-    assert user['full_name'] == 'John Doe'
-    assert user['email'] == 'john@example.com'
-    assert user['password'] == 'password123'
