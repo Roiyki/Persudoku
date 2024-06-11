@@ -51,10 +51,10 @@ def test_registration(client):
     print("Your Registration Data:", registration_data)
 
     # Simulate a registration request
-    response = client.post('/register', data=registration_data)
+    response = client.post('/register', data=registration_data, content_type='application/x-www-form-urlencoded')
 
-    # Print request data
-    print("Registration Request Data:", response.request.data)
+    # Print request data (commented out because it causes issues)
+    # print("Registration Request Data:", response.request.data)
 
     # Print response status code and headers
     print("Registration Response Status Code:", response.status_code)
