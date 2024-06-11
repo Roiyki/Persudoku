@@ -14,6 +14,10 @@ spec:
     command:
     - cat
     tty: true
+  - name: mongo
+    image: mongo:latest
+    ports:
+    - containerPort: 27017
 """
         }
     }
@@ -23,6 +27,7 @@ spec:
         GITHUB_USER = 'Roiyki'
         REPO = 'Roiyki/Persudoku'
         GIT_CREDENTIALS_ID = 'github-secret-read-jenkins'
+        MONGO_URI = 'mongodb://mongo:27017/sudoku_app_test'
     }
 
     stages {
