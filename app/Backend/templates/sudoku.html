@@ -10,30 +10,36 @@
             border-collapse: collapse;
             margin: 20px auto;
             font-family: Arial, sans-serif;
+            border: 3px solid black; /* Add border around the whole grid */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Add shadow for a lifted effect */
         }
         td {
             border: 1px solid black;
-            width: 40px;
-            height: 40px;
+            width: 65px;
+            height: 65px;
             text-align: center;
             vertical-align: middle;
-            font-size: 20px;
+            font-size: 30px;
+            transition: background-color 0.3s; /* Add transition for smoother hover effect */
+            cursor: pointer; /* Add pointer cursor */
+            background-color: #909090; /* Lighter background color */
+            color: #303030;
         }
         /* Thicker borders for 3x3 squares */
         td:nth-child(3n+1) {
-            border-left-width: 2px;
+            border-left-width: 5px;
         }
         td:nth-child(3n) {
-            border-right-width: 2px;
+            border-right-width: 5px;
         }
         tr:nth-child(3n+1) td {
-            border-top-width: 2px;
+            border-top-width: 5px;
         }
         tr:nth-child(3n) td {
-            border-bottom-width: 2px;
+            border-bottom-width: 5px;
         }
         .highlight {
-            background-color: yellow;
+            background-color: #b0b0b0;
         }
         .correct {
             color: green;
@@ -42,6 +48,11 @@
             color: red;
         }
         body {
+            background-color: #2c3338; /* Dark background color */
+            color: #606468; /* Text color */
+            font-family: "Open Sans", sans-serif; /* Font style */
+            margin: 0;
+            padding: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -49,6 +60,74 @@
         input, button {
             margin-top: 10px;
             font-size: 18px;
+            padding: 10px; /* Add padding for better button appearance */
+            border: none; /* Remove default button border */
+            border-radius: 5px; /* Add border radius for rounded corners */
+            cursor: pointer; /* Add pointer cursor */
+            background-color: #4CAF50; /* Green */
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            transition-duration: 0.4s;
+            font-family: Arial, sans-serif;
+        }
+        input:hover, button:hover {
+            background-color: #45a049; /* Darker green on hover */
+        }
+        h1 {
+            font-weight: bold; /* Make the title bolder */
+            font-size: 3.5rem; /* Increase font size */
+            margin-bottom: 0px; /* Increase margin for better spacing */
+            color: #aaa; /* Lighter title color */
+        }
+        p {
+            margin: 10px 0; /* Add margin to paragraphs for better spacing */
+            font-size: 1.05rem; /* Increase font size */
+            font-weight: bold; /* Make the title bolder */
+            color: #aaa
+        }
+        #selected-number {
+            padding: 5px; /* Add padding for better input field appearance */
+            width: 140px; /* Increase input field width */
+            text-align: center; /* Center text */
+            color: white; /* Set text color to white */
+            ::-webkit-input-placeholder {
+                /* WebKit browsers */
+                color: white; /* Set placeholder text color to white */
+            }
+            :-moz-placeholder {
+                /* Mozilla Firefox 4 to 18 */
+                color: white; /* Set placeholder text color to white */
+                opacity: 1; /* Required opacity for Firefox */
+            }
+            ::-moz-placeholder {
+                /* Mozilla Firefox 19+ */
+                color: white; /* Set placeholder text color to white */
+                opacity: 1; /* Required opacity for Firefox */
+            }
+            :-ms-input-placeholder {
+                /* Internet Explorer 10+ */
+                color: white; /* Set placeholder text color to white */
+            }
+        }
+        ::-webkit-input-placeholder {
+            /* WebKit browsers */
+            color: white; /* Set placeholder text color to white */
+        }
+        :-moz-placeholder {
+            /* Mozilla Firefox 4 to 18 */
+            color: white; /* Set placeholder text color to white */
+            opacity: 1; /* Required opacity for Firefox */
+        }
+        ::-moz-placeholder {
+            /* Mozilla Firefox 19+ */
+            color: white; /* Set placeholder text color to white */
+            opacity: 1; /* Required opacity for Firefox */
+        }
+        :-ms-input-placeholder {
+            /* Internet Explorer 10+ */
+            color: white; /* Set placeholder text color to white */
         }
     </style>
 </head>
@@ -60,7 +139,7 @@
     <table id="sudoku-grid">
         <!-- Sudoku grid will be dynamically populated here -->
     </table>
-    <input type="number" id="selected-number" min="1" max="9">
+    <input type="number" id="selected-number" min="1" max="9" placeholder="Enter Number">
     <button onclick="placeNumber()">Place Number</button>
     <script>
         document.addEventListener("DOMContentLoaded", function() {

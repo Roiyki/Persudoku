@@ -4,21 +4,154 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Select Difficulty</title>
+    <style>
+        :root {
+            --baseColor: #606468;
+            --bodyBackgroundColor: #2c3338;
+            --bodyColor: var(--baseColor);
+            --loginInputBackgroundColor: #3b4148;
+            --loginInputHoverBackgroundColor: #434a52;
+            --loginLabelBackgroundColor: #363b41;
+            --loginBorderRadus: 0.25rem;
+            --loginSubmitBackgroundColor: #ea4c88;
+            --loginSubmitColor: #eee;
+            --loginSubmitHoverBackgroundColor: #d44179;
+            --iconFill: var(--baseColor);
+        }
+
+        body {
+            background-color: var(--bodyBackgroundColor);
+            color: var(--bodyColor);
+            font-family: "Open Sans", sans-serif;
+            font-size: 0.875rem;
+            font-weight: 400;
+            line-height: 1.5;
+            margin: 0;
+            min-block-size: 100vh;
+            display: grid;
+            place-items: center;
+            position: relative; /* Add relative positioning to the body */
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            position: absolute; /* Set absolute positioning */
+            top: 0; /* Align the image to the top */
+            left: 50%; /* Align the image to the center horizontally */
+            transform: translateX(-50%); /* Adjust for center alignment */
+            margin-top: -500px; /* Adjust the top margin as needed */
+        }
+
+        h1 {
+            color: green;
+            margin-bottom: 1rem;
+            position: absolute;
+            top: 460px; /* Adjust this value to your preference */
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1;
+            font-weight: 800; /* Make the text bold */
+            font-size: 4rem; /* Increase the font size */
+        }
+
+        .grid {
+            position: relative;
+            z-index: 1; /* Ensure the grid is above the logo */
+            margin-top: 30rem; /* Adjust the value as needed */
+        }
+        
+        .form {
+            display: grid;
+            gap: 0.875rem;
+        }
+
+        .form__field {
+            display: flex;
+            align-items: center;
+        }
+
+        .form__label {
+            background-color: var(--loginLabelBackgroundColor);
+            border-bottom-right-radius: 0;
+            border-top-right-radius: 0;
+            padding-inline: 1.25rem;
+            display: flex;
+            align-items: center;
+            color: white;
+        }
+
+        select,
+        input[type="submit"] {
+            background-color: green;
+            color: white;
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: pointer;
+            border-radius: var(--loginBorderRadus);
+            padding: 0.75rem 1rem;
+            border: 0;
+            transition: background-color 0.3s;
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+
+        select:hover,
+        input[type="submit"]:hover {
+            background-color: hsl(120, 30%, 50%);
+        }
+
+        .form__submit {
+            padding: 0.75rem 1rem; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+
+        .hidden {
+            border: 0;
+            clip: rect(0 0 0 0);
+            height: 1px;
+            margin: -1px;
+            overflow: hidden;
+            padding: 0;
+            position: absolute;
+            width: 1px;
+        }
+
+        .icon {
+            block-size: 1em;
+            display: inline-block;
+            fill: var(--iconFill);
+            inline-size: 1em;
+            vertical-align: middle;
+        }
+    </style>
 </head>
 <body>
     <h1>Select Difficulty</h1>
-    <form id="generate-form" action="/generate_sudoku" method="POST">
-        <label for="difficulty">Difficulty:</label><br>
-        <select id="difficulty" name="difficulty">
-            <option value="easy">Easy</option>
-            <option value="medium">Medium</option>
-            <option value="hard">Hard</option>
-        </select><br>
-        <input type="submit" value="Generate Sudoku">
-    </form>
+    <img src="{{ url_for('static', filename='images/Logo.png') }}" alt="Logo" style="width: 60%; height: auto; margin-bottom: 0px;">
     
-    <div id="sudoku-puzzle"></div>
-    
+
+    <div class="grid">
+        <form id="generate-form" action="/generate_sudoku" method="POST" class="form login">
+            <div class="form__field">
+                <label for="difficulty" class="form__label"><svg class="icon">
+                    <use xlink:href="#icon-user"></use>
+                </svg>Difficulty:</label>
+                <select id="difficulty" name="difficulty" class="form__input">
+                    <option value="easy">Easy</option>
+                    <option value="medium">Medium</option>
+                    <option value="hard">Hard</option>
+                </select>
+            </div>
+            <div class="form__field">
+                <input type="submit" value="Generate Sudoku" class="form__submit">
+            </div>
+        </form>
+    </div>
+
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             const generateForm = document.getElementById("generate-form");
