@@ -34,36 +34,36 @@
         }
 
         img {
-            max-width: 100%;
+            width: 60%;
             height: auto;
             position: absolute; /* Set absolute positioning */
             top: 0; /* Align the image to the top */
             left: 50%; /* Align the image to the center horizontally */
             transform: translateX(-50%); /* Adjust for center alignment */
-            margin-top: -500px; /* Adjust the top margin as needed */
+            margin-top: -26.5%; /* Adjust the top margin as needed */
         }
 
         h1 {
             color: green;
-            margin-bottom: 1rem;
+            margin-bottom: 1;
             position: absolute;
-            top: 460px; /* Adjust this value to your preference */
+            top: 20%; /* Adjust this value to your preference */
             left: 50%;
             transform: translateX(-50%);
             z-index: 1;
-            font-weight: 800; /* Make the text bold */
-            font-size: 4rem; /* Increase the font size */
+            font-weight: 800%; /* Make the text bold */
+            font-size: calc(2.1rem + 2vw); /* Increase the font size */
         }
 
         .grid {
             position: relative;
             z-index: 1; /* Ensure the grid is above the logo */
-            margin-top: 30rem; /* Adjust the value as needed */
+            margin-top: 15%; /* Adjust the value as needed */
         }
         
         .form {
             display: grid;
-            gap: 0.875rem;
+            gap: 22%;
         }
 
         .form__field {
@@ -75,7 +75,7 @@
             background-color: var(--loginLabelBackgroundColor);
             border-bottom-right-radius: 0;
             border-top-right-radius: 0;
-            padding-inline: 1.25rem;
+            padding-inline: 4%;
             display: flex;
             align-items: center;
             color: white;
@@ -85,7 +85,7 @@
         input[type="submit"] {
             background-color: green;
             color: white;
-            font-weight: 700;
+            font-weight: 700%;
             text-transform: uppercase;
             cursor: pointer;
             border-radius: var(--loginBorderRadus);
@@ -130,8 +130,8 @@
     </style>
 </head>
 <body>
-    <h1>Select Difficulty</h1>
-    <img src="{{ url_for('static', filename='images/Logo.png') }}" alt="Logo" style="width: 60%; height: auto; margin-bottom: 0px;">
+    <h1 style="top: 40%;">Select Difficulty</h1>
+    <img src="{{ url_for('static', filename='images/Logo.png') }}" alt="Logo" style="width: 55%; height: auto; margin-bottom: 0px; margin-top: -26.3%;">
     
 
     <div class="grid">
