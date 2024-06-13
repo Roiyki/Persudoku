@@ -14,10 +14,16 @@
 *.swp
 *.bak
 *.tmp
-*.orig
 *~
 # Various IDEs
 .project
 .idea/
 *.tmproj
-.vscode/
+# helm/charts
+OWNERS
+hack/
+ci/
+kube-prometheus-*.tgz
+
+unittests/
+files/dashboards/

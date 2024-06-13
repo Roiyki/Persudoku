@@ -32,8 +32,19 @@ PASSWORD=$(kubectl -n argocd-namespace get secret argocd-initial-admin-secret -o
   --path charts/jenkinschart \
   --revision HEAD \
   --dest-server https://kubernetes.default.svc \
-  --dest-namespace jenkins \
+  --dest-namespace jenkins-namespace \
   --helm-set-file values=values.yaml \
   --sync-policy automated \
   --self-heal \
   --upsert
+
+./argocd app create kube-prometheus-stack \
+    --project default \
+    --repo https://prometheus-community.github.io/helm-charts \
+    --path charts/kube-prometheus-stack \
+    --dest-server https://kubernetes.default.svc \
+    --dest-namespace monitoring-namespace \
+    --helm-set-file values=Values.yaml \
+    --sync-policy automated \
+    --self-heal \
+    --upsert
