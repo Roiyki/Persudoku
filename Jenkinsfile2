@@ -1,89 +1,57 @@
-pipeline {
-    agent {
-        kubernetes {
-            label 'jenkins-slave-pipeline-2'
-            yaml '''
-            apiVersion: v1
-            kind: Pod
-            spec:
-                serviceAccount: jenkins-sa
-                containers:
-                  - name: slave
-                    image: docker:latest
-                    tty: true
-                    securityContext:  # This section grants privileged access
-                        privileged: true
-                  - name: maven
-                    image: maven:alpine
-                    command:
-                    - cat
-                    tty: true
-            '''
+stages {
+    stage('checkout git') {
+        steps {
+            script {
+                checkout scm
+            }
         }
     }
 
-    environment {
-        BUILD_TAG = "build-${env.BUILD_NUMBER}"
-    }
-
-    stages {
-        stage('Checkout Git') {
-            steps {
-                script {
-                    checkout scm
-                }
-            }
+    // Build and push with build tag (replace with actual build commands)
+    stage('Build and Push the image with tags') {
+        environment {
+            auth = 'dockerauth'
         }
-
-        stage('Build and Push Image') {
-            environment {
-                auth = 'dockerauth'
-            }
-            steps { 
-                container('slave') {
-                    script {
-                        def image = docker.build("roiyki/persudoku-flask:${BUILD_TAG}", "./app/Backend")
-                        withDockerRegistry(credentialsId: 'docker-credentials') {
-                            image.push("${BUILD_TAG}")
-                        }
-                    }
-                }
-            }
-        }
-
-        stage('Deploy with Argo CD') {
-            steps {
+        steps { 
+            container('slave') {
                 script {
-                    def argocdToken = credentials('argocd-token')
-                    def appName = "persudoku"  // Replace with your Argo CD application name
-                    def argoCdServer = "10.0.0.10:30080"
-                    def argoCdUrl = "https://${argoCdServer}/api/v1/applications/${appName}/sync"
-                    
-                    try {
-                        sh """
-                        curl -sSf -k -X POST ${argoCdUrl} \
-                            -H "Authorization: Bearer ${argocdToken}" \
-                            -H "Content-Type: application/json" \
-                            -d '{}'
-                        """
-                    } catch (Exception e) {
-                        currentBuild.result = 'FAILURE'
-                        error("Failed to trigger Argo CD sync: ${e.message}")
+                    def image = docker.build("roiyki/persudoku-flask", "./app/Backend")
+                    withDockerRegistry(credentialsId: 'docker-credentials') {
+                        image.push("${env.BUILD_NUMBER}")
+                        image.push("latest")
                     }
                 }
             }
         }
     }
 
-    post {
-        always {
-            echo 'Pipeline POST:'
+    stage('Deploy with Argo CD') {
+        steps {
+            script {
+                def argocdToken = credentials('argocd-token')
+                def appName = "persudoku"  // Replace with your Argo CD application name
+                def argoCdServer = "10.0.0.10:30080"
+                def argoCdUrl = "https://${argoCdServer}/api/v1/applications/${appName}/sync"  // Replace with your Argo CD server URL
+                
+                sh """
+                curl -k -X POST ${argoCdUrl} \
+                    -H "Authorization: Bearer ${argocdToken}" \
+                    -H "Content-Type: application/json" \
+                    -d '{}'
+                """
+            }
         }
-        success {
-            echo 'Pipeline SUCCESS!'
-        }
-        failure {
-            echo 'Pipeline FAILED, check the logs for more information!'
-        }
+    }
+}
+
+post {
+    always {
+        echo 'Pipeline POST:'
+    }
+    success {
+        echo 'Pipeline SUCCESS!'
+    }
+    failure {
+        echo 'Pipeline FAILED, check the logs for more information!'
     }
 }
