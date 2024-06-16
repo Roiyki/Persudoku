@@ -1,0 +1,60 @@
+{{- if .Values.service.enabled }}
+{{- $root := . }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "grafana.fullname" . }}
+  namespace: {{ include "grafana.namespace" . }}
+  labels:
+    {{- include "grafana.labels" . | nindent 4 }}
+    {{- with .Values.service.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.service.annotations }}
+  annotations:
+    {{- tpl (toYaml . | nindent 4) $root }}
+  {{- end }}
+spec:
+  type: ClusterIP  # Always default to ClusterIP
+  {{- if .Values.service.type }}
+  type: {{ .Values.service.type }}
+  {{- end }}
+  {{- with .Values.service.clusterIP }}
+  clusterIP: {{ . }}
+  {{- end }}
+  {{- if eq .Values.service.type "LoadBalancer" }}
+  {{- with .Values.service.loadBalancerIP }}
+  loadBalancerIP: {{ . }}
+  {{- end }}
+  {{- with .Values.service.loadBalancerClass }}
+  loadBalancerClass: {{ . }}
+  {{- end }}
+  {{- with .Values.service.loadBalancerSourceRanges }}
+  loadBalancerSourceRanges:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- end }}
+  {{- with .Values.service.externalIPs }}
+  externalIPs:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.service.externalTrafficPolicy }}
+  externalTrafficPolicy: {{ . }}
+  {{- end }}
+  ports:
+    - name: {{ .Values.service.portName }}
+      port: {{ .Values.service.port }}
+      protocol: TCP
+      targetPort: {{ .Values.service.targetPort }}
+      {{- with .Values.service.appProtocol }}
+      appProtocol: {{ . }}
+      {{- end }}
+      {{- if and (eq .Values.service.type "NodePort") .Values.nodePort.enabled }}
+      nodePort: {{ .Values.nodePort.port }}
+      {{- end }}
+      {{- with .Values.extraExposePorts }}
+      {{- tpl (toYaml . | nindent 4) $root }}
+      {{- end }}
+  selector:
+    {{- include "grafana.selectorLabels" . | nindent 4 }}
+{{- end }}

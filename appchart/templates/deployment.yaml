@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-flask
+  labels:
+    app: {{ .Release.Name }}-flask
+  annotations:
+    argocd-image-updater.argoproj.io/image-list: |
+      {{ .Values.flask.image.repository }}: {{ .Values.flask.image.tag }}
+    argocd-image-updater.argoproj.io/write-back-method: git:secret:argocd/git-creds
+    argocd-image-updater.argoproj.io/git-branch: main
+spec:
+  replicas: {{ .Values.replicaCount.flask | default 1 }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-flask
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-flask
+    spec:
+      containers:
+        - name: flask
+          image: "{{ .Values.flask.image.repository }}:{{ .Values.flask.image.tag }}"
+          ports:
+            - containerPort: 5000
+          imagePullPolicy: Always # Ensure image is always pulled
+          # Add volume mounts if needed
+      imagePullSecrets: # Add this section
+        - name: {{ .Values.flask.image.secretName }} # Name of your Docker registry secret
+      # Add volumes if needed
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-flask
+  labels:
+    app: {{ .Release.Name }}-flask
+spec:
+  type: NodePort
+  ports:
+    - protocol: TCP
+      port: {{ .Values.flask.service.port }}
+      targetPort: 5000
+      nodePort: {{ .Values.flask.service.nodePort }}
+  selector:
+    app: {{ .Release.Name }}-flask
