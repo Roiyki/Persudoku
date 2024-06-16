@@ -20,15 +20,4 @@
 .project
 .idea/
 *.tmproj
-<<<<<<< HEAD:charts/kube-prometheus-stack/charts/grafana/.helmignore
 OWNERS
-=======
-# helm/charts
-OWNERS
-hack/
-ci/
-kube-prometheus-*.tgz
-
-unittests/
-files/dashboards/
->>>>>>> d6b4917e180b0bc8d964785a7de3496d4ef817c0:charts/monitoring/.helmignore
