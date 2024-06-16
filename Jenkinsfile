@@ -4,17 +4,17 @@ pipeline {
             label 'jenkins-slave-pipeline-a'
             defaultContainer 'custom'
             yaml """
-apiVersion: v1
-kind: Pod
-spec:
-  serviceAccountName: jenkins-sa
-  containers:
-  - name: custom
-    image: roiyki/inbound-agent-root:latest
-    command:
-    - cat
-    tty: true
-"""
+                apiVersion: v1
+                kind: Pod
+                spec:
+                  serviceAccountName: jenkins-sa
+                  containers:
+                  - name: custom
+                    image: roiyki/inbound-agent-root
+                    command:
+                    - cat
+                    tty: true
+            """
         }
     }
 
@@ -126,6 +126,18 @@ spec:
                     }
                 }
             }
+        }
+    }
+
+    post {
+        always {
+            echo 'Pipeline POST:'
+        }
+        success {
+            echo 'Pipeline SUCCESS!'
+        }
+        failure {
+            echo 'Pipeline FAILED, check the logs for more information!'
         }
     }
 }
