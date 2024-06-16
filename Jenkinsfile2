@@ -23,7 +23,7 @@ pipeline {
     }
 
     stages {
-        stage('checkout git') {
+        stage('Checkout Git') {
             steps {
                 script {
                     checkout scm
@@ -31,8 +31,7 @@ pipeline {
             }
         }
 
-        // Build and push with build tag (replace with actual build commands)
-        stage('Build and Push the image with tags') {
+        stage('Build and Push Image') {
             environment {
                 auth = 'dockerauth'
             }
@@ -55,14 +54,19 @@ pipeline {
                     def argocdToken = credentials('argocd-token')
                     def appName = "persudoku"  // Replace with your Argo CD application name
                     def argoCdServer = "10.0.0.10:30080"
-                    def argoCdUrl = "https://${argoCdServer}/api/v1/applications/${appName}/sync"  // Replace with your Argo CD server URL
+                    def argoCdUrl = "https://${argoCdServer}/api/v1/applications/${appName}/sync"
                     
-                    sh """
-                    curl -k -X POST ${argoCdUrl} \
-                        -H "Authorization: Bearer ${argocdToken}" \
-                        -H "Content-Type: application/json" \
-                        -d '{}'
-                    """
+                    try {
+                        sh """
+                        curl -sSf -k -X POST ${argoCdUrl} \
+                            -H "Authorization: Bearer ${argocdToken}" \
+                            -H "Content-Type: application/json" \
+                            -d '{}'
+                        """
+                    } catch (Exception e) {
+                        currentBuild.result = 'FAILURE'
+                        error("Failed to trigger Argo CD sync: ${e.message}")
+                    }
                 }
             }
         }
