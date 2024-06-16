@@ -223,7 +223,7 @@ service:
   loadBalancerIP: ""
   loadBalancerClass: ""
   loadBalancerSourceRanges: []
-  port: 3000
+  port: 80
   targetPort: 3000
     # targetPort: 4181 To be used with a proxy extraContainer
   ## Service annotations. Can be templated.
@@ -233,9 +233,18 @@ service:
   # Adds the appProtocol field to the service. This allows to work with istio protocol selection. Ex: "http" or "tcp"
   appProtocol: ""
 
-nodePort:
+nodePortService:
   enabled: true
-  port: 32200  
+  clusterIP: ""
+  externalIPs: []
+  externalTrafficPolicy: Cluster
+  port: 3000
+  targetPort: 3000
+  nodePort: 32200
+  annotations: {}
+  labels: {}
+  portName: nodeport-service
+
 serviceMonitor:
   ## If true, a ServiceMonitor CRD is created for a prometheus operator
   ## https://github.com/coreos/prometheus-operator
@@ -294,7 +303,6 @@ ingress:
   #       name: ssl-redirect
   #       port:
   #         name: use-annotation
-
 
   tls: []
   #  - secretName: chart-example-tls
@@ -362,7 +370,7 @@ extraContainerVolumes: []
 
 ## Enable persistence using Persistent Volume Claims
 ## ref: http://kubernetes.io/docs/user-guide/persistent-volumes/
-##
+
 persistence:
   type: pvc
   enabled: false

@@ -3112,8 +3112,65 @@ prometheus:
       clientIP:
         timeoutSeconds: 10800
 
-  ## Configuration for creating a separate Service for each statefulset Prometheus replica
-  ##
+  nodePortService:
+    annotations: {}
+    labels: {}
+    clusterIP: ""
+    ipDualStack:
+        enabled: false
+        ipFamilies: ["IPv6", "IPv4"]
+        ipFamilyPolicy: "PreferDualStack"
+    ## Port for Prometheus Service to listen on
+    ##
+    port: 9090
+    ## To be used with a proxy extraContainer port
+    targetPort: 9090
+    ## List of IP addresses at which the Prometheus server service is available
+    ## Ref: https://kubernetes.io/docs/user-guide/services/#external-ips
+    ##
+    externalIPs: []
+
+    ## Port to expose on each node
+    ## Only used if service.type is 'NodePort'
+    ##
+    nodePort: 32100
+
+      ## Denotes if this Service desires to route external traffic to node-local or cluster-wide endpoints
+      ##
+    externalTrafficPolicy: Cluster
+
+    ## Service type
+    ##
+    type: NodePort
+
+    ## Additional ports to open for Prometheus service
+    ##
+    additionalPorts: []
+    # additionalPorts:
+      # - name: oauth-proxy
+      #   port: 8081
+      #   targetPort: 8081
+      # - name: oauth-metrics
+      #   port: 8082
+      #   targetPort: 8082
+
+    ## Consider that all endpoints are considered "ready" even if the Pods themselves are not
+    ## Ref: https://kubernetes.io/docs/reference/kubernetes-api/service-resources/service-v1/#ServiceSpec
+    publishNotReadyAddresses: false
+
+    ## If you want to make sure that connections from a particular client are passed to the same Pod each time
+    ## Accepts 'ClientIP' or 'None'
+    ##
+    sessionAffinity: None
+
+      ## If you want to modify the ClientIP sessionAffinity timeout
+      ## The value must be >0 && <=86400(for 1 day) if ServiceAffinity == "ClientIP"
+      ##
+    sessionAffinityConfig:
+      clientIP:
+        timeoutSeconds: 10800
+    ## Configuration for creating a separate Service for each statefulset Prometheus replica
+    ##
   servicePerReplica:
     enabled: false
     annotations: {}
