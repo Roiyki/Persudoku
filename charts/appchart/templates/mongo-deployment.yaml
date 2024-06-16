@@ -12,6 +12,9 @@ spec:
     metadata:
       labels:
         app: mongo
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "{{ .Values.flask.image.port  }}"
     spec:
       containers:
         - name: mongo

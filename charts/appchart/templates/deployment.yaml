@@ -13,6 +13,9 @@ spec:
     metadata:
       labels:
         app: {{ .Release.Name }}-flask
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "{{ .Values.flask.image.port  }}"
     spec:
       containers:
         - name: flask
