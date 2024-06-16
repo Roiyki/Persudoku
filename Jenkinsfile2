@@ -22,6 +22,10 @@ pipeline {
         }
     }
 
+    environment {
+        BUILD_TAG = "build-${env.BUILD_NUMBER}"
+    }
+
     stages {
         stage('Checkout Git') {
             steps {
@@ -38,9 +42,9 @@ pipeline {
             steps { 
                 container('slave') {
                     script {
-                        def image = docker.build("roiyki/persudoku-flask", "./app/Backend")
+                        def image = docker.build("roiyki/persudoku-flask:${BUILD_TAG}", "./app/Backend")
                         withDockerRegistry(credentialsId: 'docker-credentials') {
-                            image.push("latest")
+                            image.push("${BUILD_TAG}")
                         }
                     }
                 }
