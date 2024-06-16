@@ -54,18 +54,22 @@ pipeline {
         stage('Deploy with Argo CD') {
             steps {
                 script {
-                    def argocdToken = credentials('argocd-token')
-                    def appName = "persudoku"  // Replace with your Argo CD application name
-                    def argoCdServer = "10.0.0.10:30080"
-                    def argoCdUrl = "https://${argoCdServer}/api/v1/applications/${appName}/sync"
-                    
-                    try {
-                        sh """
-                        curl -k -X POST ${argoCdUrl} \
-                            -H "Authorization: Bearer ${argocdToken}" \
-                            -H "Content-Type: application/json" \
-                            -d '{}'
-                        """
+                    withCredentials([string(credentialsId: 'argocd-token', variable: 'ARGOCD_TOKEN')]) {
+                        def appName = "persudoku"  // Replace with your Argo CD application name
+                        def argoCdServer = "10.0.0.10:30080"
+                        def argoCdUrl = "https://${argoCdServer}/api/v1/applications/${appName}/sync"
+                        
+                        try {
+                            sh """
+                            curl -sSf -k -X POST ${argoCdUrl} \
+                                -H "Authorization: Bearer ${ARGOCD_TOKEN}" \
+                                -H "Content-Type: application/json" \
+                                -d '{}'
+                            """
+                        } catch (Exception e) {
+                            currentBuild.result = 'FAILURE'
+                            error("Failed to trigger Argo CD sync: ${e.message}")
+                        }
                     }
                 }
             }
