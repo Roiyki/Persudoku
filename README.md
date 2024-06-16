@@ -1,4 +1,4 @@
-# Expenses Tracker
+# Persudoku
 
 This is Persudoku. a personal Sudoku generator!
 If you are passionate about Sudoku I recommandyou to try it!
@@ -6,7 +6,7 @@ If you are passionate about Sudoku I recommandyou to try it!
 ## Features
 ### Home
 
-<div align="center"><img src="images/home.png" alt="Home" width="500" height="300"></div>
+<div align="center"><img src="images/index.png" alt="Home" width="500" height="300"></div>
 
 The index page  gives you a menu with difficulty options to generate a Sudoku game
 
@@ -19,13 +19,13 @@ If you still don't have a user your more then welcome to register into our commu
 
 ### Register
 
-<div align="center"><img src="images/dashboard.png" alt="Dashboard" width="500" height="300"></div>
+<div align="center"><img src="images/register.png" alt="Dashboard" width="500" height="300"></div>
 
 Here you can register for the first time so we can get to know each other a little
 
 ### Sudoku
 
-<div align="center"><img src="/images/addExpenses.png" alt="Add Expenses" width="500" height="300"></div>
+<div align="center"><img src="/images/sudoku.png" alt="Add Expenses" width="500" height="300"></div>
 
 After you created a user and registered to our website in the home page you can choose a difficulty and start playing right over here!
 
@@ -41,8 +41,8 @@ My project features a wide set of technologies and tools to ensure a high-qualit
 
 ### Containerization and Artifact Storage
 
-- **Docker Hub**: A service provided by Docker for finding and sharing container images in a public repository. I've use Docker Hub to store and manage my application's artifacts securely.
-  - <div align="center"><img src="/images/docker.png" alt="Docker Hub Icon" height="100"></div>
+- **Docker Hub**: A service provided by Docker for finding and sharing container images in a public repository. I've use Docker Hub to store and manage my application's artifacts securely. In Dockerhub I store images for: my app, 
+  - <div align="center"><img src="/images/dockerhub.png" alt="Docker Hub Icon" height="100"></div>
 
 ### Deployment
 
@@ -60,7 +60,7 @@ My project features a wide set of technologies and tools to ensure a high-qualit
 ### Database
 
 - **MongoDB**: A general purpose, document-based, distributed database built for modern application developers and for the cloud era. MongoDB is our choice for storing and managing data due to its flexibility and scalability.
-  - <div align="center"><img src="/images/mongo.png" alt="MongoDB Icon" height="100"></div>
+  - <div align="center"><img src="/images/mongodb.png" alt="MongoDB Icon" height="100"></div>
 
 ### Application Development
 
@@ -91,11 +91,11 @@ Ensure you have a `docker-compose.yml` file in the root of your project with the
 version: '3.8'
 services:
   app:
-    image: roytzahor/expese-tracker:latest
+    image: roiyki/persudoku-flask:latest
     ports:
       - "5000:5000"
     environment:
-      - MONGO_URI=mongodb://mongo:27017/expenses_tracker_db
+      - MONGO_URI=mongodb://mongo:27017/sudoku_app
     depends_on:
       - mongo
   mongo:
@@ -122,9 +122,9 @@ The application will be accessible in your web browser at http://localhost:5000.
 
 ### Contributing:
 
-We encourage contributions! Fork the repository, make your changes, and create a pull request.
+I encourage contributions! Fork the repository, make your changes, and create a pull request.
 
 
 ## Contact:
 
-For questions or feedback, feel free to reach out to us: [roy.tzahor1@gmail.com]
+For questions or feedback, feel free to reach out to us: [roiydonagi@gmail.com]
