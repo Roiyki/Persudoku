@@ -1,51 +1,47 @@
 # Expenses Tracker
 
-Welcome to the Expenses Tracker project! This application is designed to help users manage and visualize their expenses efficiently.
+This is Persudoku. a personal Sudoku generator!
+If you are passionate about Sudoku I recommandyou to try it!
 
 ## Features
 ### Home
 
 <div align="center"><img src="images/home.png" alt="Home" width="500" height="300"></div>
 
-The home page greets you with a summary of existing users and allow you to connect to your account
+The index page  gives you a menu with difficulty options to generate a Sudoku game
 
 ### Login
 
 <div align="center"><img src="images/login.png" alt="Login" width="500" height="300"></div>
 
-Secure access to your expense tracker with a robust login system. Manage your personal finances with confidence and privacy.
+You need to create a user before you can start playing our awesome game.
+If you still don't have a user your more then welcome to register into our community in the button at the bottom of the page
 
-### Dashboard
+### Register
 
 <div align="center"><img src="images/dashboard.png" alt="Dashboard" width="500" height="300"></div>
 
-The dashboard provides a quick overview of your expenses. It visualizes your spending patterns by category, or check your balance on the current month, helping you understand where your money goes.
+Here you can register for the first time so we can get to know each other a little
 
-### Add Expenses
+### Sudoku
 
 <div align="center"><img src="/images/addExpenses.png" alt="Add Expenses" width="500" height="300"></div>
 
-Here you can add new expenses by entering details such as the expense category, amount spent, date of expense, and any additional notes.
-
-### Current Expenses
-
-<div align="center"><img src="/images/currentExpenses.png" alt="Current Expenses" width="500" height="300"></div>
-
-This section allows you to view all your recorded expenses, edit them, or delete them. It's your financial activity log in one place.
+After you created a user and registered to our website in the home page you can choose a difficulty and start playing right over here!
 
 
 ## Technology Stack
 
-Our project leverages a comprehensive set of technologies and tools to ensure high-quality development, continuous integration, and robust deployment practices. Below, you'll find a detailed overview of our tech stack, emphasizing our DevOps processes:
+My project features a wide set of technologies and tools to ensure a high-quality application, with continuous integration, and robust deployment practices. Below, you'll find a detailed overview of our tech stack, emphasizing our DevOps processes:
 
 ### Continuous Integration and Delivery
 
-- **Jenkins**: An open-source automation server that enables developers around the world to reliably build, test, and deploy their software. Jenkins orchestrates our CI/CD pipeline, integrating seamlessly with GitHab for a smooth development process. in this project used with multibranch pipeline t orun diffrent workflows.
+- **Jenkins**: An open-source automation server that enables developers around the world to reliably build, test, and deploy their software. Jenkins orchestrates our CI/CD pipeline, integrating seamlessly with GitHab for a smooth development process. in this project used with a pipeline to run different CI pipelines for testing the functions of my app with Pytest building my image to dockerhub and then for CD to sync my app's image with ArgoCD. Ive created my Jenkins pipeline in a Helmchart I created and is deployed with the helpof ArgoCD
   - <div align="center"><img src="/images/jenkins.png" alt="Jenkins Icon" height="100"></div>
 
 ### Containerization and Artifact Storage
 
-- **Docker Hub**: A service provided by Docker for finding and sharing container images with your team. It's the world's largest library and community for container images. We use Docker Hub to store and manage our application's artifacts securely.
+- **Docker Hub**: A service provided by Docker for finding and sharing container images in a public repository. I've use Docker Hub to store and manage my application's artifacts securely.
   - <div align="center"><img src="/images/docker.png" alt="Docker Hub Icon" height="100"></div>
 
 ### Deployment

@@ -6,7 +6,7 @@ flask:
   image:
     repository: roiyki/persudoku-flask
     pullPolicy: IfNotPresent
-    tag: "build-${env.BUILD_NUMBER}"
+    tag: "latest"
     secretName: regcred
   service:
     type: NodePort
