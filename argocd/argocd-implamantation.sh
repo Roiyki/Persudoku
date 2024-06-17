@@ -4,13 +4,13 @@
 PASSWORD=$(kubectl -n argocd-namespace get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d)
 
 # Log in to Argo CD
-./exe/argocd login 192.168.68.60:30080 --username admin --password $PASSWORD --insecure
+./exe/argocd login 10.0.0.10:30080 --username admin --password $PASSWORD --insecure
 
 # Update the password to a new one
 ./exe/argocd account update-password --current-password $PASSWORD --new-password roiyiy123 --insecure
 
 # Log in with the new password
-./exe/argocd login 192.168.68.60:30080 --username admin --password roiyiy123 --insecure
+./exe/argocd login 10.0.0.10:30080 --username admin --password roiyiy123 --insecure
 
 # Create or update the Persudoku application
 ./exe/argocd app create persudoku \
