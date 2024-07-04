@@ -1,7 +1,7 @@
 # Persudoku
 
 This is Persudoku. a personal Sudoku generator!
-If you are passionate about Sudoku I recommandyou to try it!
+If you are passionate about Sudoku I recommand you to try it!
 
 ## Features
 ### Home
