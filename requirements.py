@@ -4,3 +4,4 @@ pymongo==4.1.1
 Werkzeug>=2.3.7
 python-dotenv==0.19.2
 numpy==1.21.5
+Config

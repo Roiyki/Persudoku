@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register</title>
+    <title>Login</title>
     <style>
         :root {
             --baseColor: #606468;
@@ -153,30 +153,24 @@
     <img src="{{ url_for('static', filename='images/Logo.png') }}" alt="Logo" style="width: 60%; height: auto; margin-bottom: 0px;">
 
     <div class="grid">
-        <form id="register-form" action="/register" method="post" class="form login">
+        <form id="login-form" action="/main/login" method="post" class="form login">
             <div class="form__field">
-                <label for="register__full_name"><svg class="icon">
+                <label for="login__email"><svg class="icon">
                     <use xlink:href="#icon-user"></use>
-                </svg><span class="hidden">Full Name</span></label>
-                <input autocomplete="name" id="register__full_name" type="text" name="full_name" class="form__input" placeholder="Full Name" required="">
-            </div>
-            <div class="form__field">
-                <label for="register__email"><svg class="icon">
-                    <use xlink:href="#icon-mail"></use>
                 </svg><span class="hidden">Email</span></label>
-                <input autocomplete="email" id="register__email" type="email" name="email" class="form__input" placeholder="Email" required="">
+                <input autocomplete="email" id="login__email" type="email" name="email" class="form__input" placeholder="Email" required="">
             </div>
             <div class="form__field">
-                <label for="register__password"><svg class="icon">
+                <label for="login__password"><svg class="icon">
                     <use xlink:href="#icon-lock"></use>
                 </svg><span class="hidden">Password</span></label>
-                <input id="register__password" type="password" name="password" class="form__input" placeholder="Password" required="">
+                <input id="login__password" type="password" name="password" class="form__input" placeholder="Password" required="">
             </div>
             <div class="form__field">
-                <input type="submit" value="Register" class="form__submit">
+                <input type="submit" value="Sign In" class="form__submit">
             </div>
         </form>
-        <p class="text--center">Already a member? <a href="/login">Sign in</a> <svg class="icon">
+        <p class="text--center">Not a member? <a href="{{ url_for('main.register') }}">Sign up now</a> <svg class="icon">
             <use xlink:href="#icon-arrow-right"></use>
         </svg></p>
     </div>
@@ -191,35 +185,32 @@
         <symbol id="icon-user" viewBox="0 0 1792 1792">
             <path d="M1600 1405q0 120-73 189.5t-194 69.5H459q-121 0-194-69.5T192 1405q0-53 3.5-103.5t14-109T236 1084t43-97.5 62-81 85.5-53.5T538 832q9 0 42 21.5t74.5 48 108 48T896 971t133.5-21.5 108-48 74.5-48 42-21.5q61 0 111.5 20t85.5 53.5 62 81 43 97.5 26.5 108.5 14 109 3.5 103.5zm-320-893q0 159-112.5 271.5T896 896 624.5 783.5 512 512t112.5-271.5T896 128t271.5 112.5T1280 512z"/>
         </symbol>
-        <symbol id="icon-mail" viewBox="0 0 1792 1792">
-            <path d="M1664 384H128q-53 0-90.5 37.5T0 512v768q0 53 37.5 90.5T128 1408h1536q53 0 90.5-37.5T1792 1280V512q0-53-37.5-90.5T1664 384zM896 960L384 640h832L896 960zm640-320v128L896 1152 256 768V640l320 160 320-160v128l-256 128v576h128V768l320-160 320 160v128l-256 128z"/>
-        </symbol>
     </svg>
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            const registerForm = document.getElementById("register-form");
+            const loginForm = document.getElementById("login-form");
+            const messageElement = document.getElementById("message");
 
-            registerForm.addEventListener("submit", event => {
+            loginForm.addEventListener("submit", event => {
                 event.preventDefault(); // Prevent the default form submission
 
-                const formData = new FormData(registerForm);
-                fetch("/register", {
+                const formData = new FormData(loginForm);
+                fetch("/main/login", {
                     method: "POST",
                     body: formData
                 })
-                .then(response => {
-                    if (response.ok) {
-                        window.location.href = "/login"; // Redirect to login page on successful registration
+                .then(response => response.json())
+                .then(data => {
+                    if (data.redirect) {
+                        window.location.href = data.redirect; // Redirect to the index page on successful login
                     } else {
-                        return response.json().then(data => {
-                            throw new Error(data.message || "Registration failed");
-                        });
+                        messageElement.textContent = data.message; // Display the error message
                     }
                 })
                 .catch(error => {
-                    console.error("Registration error:", error);
-                    alert("Registration error: " + error.message); // Display an error message to the user
+                    console.error("Login error:", error);
+                    messageElement.textContent = "An error occurred during login. Please try again."; // Display a generic error message
                 });
             });
         });

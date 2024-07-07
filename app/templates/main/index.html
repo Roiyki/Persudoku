@@ -127,13 +127,28 @@
             inline-size: 1em;
             vertical-align: middle;
         }
+
+        p {
+            text-align: center;
+            margin-top: 2rem;
+            color: var(--loginSubmitBackgroundColor);
+            font-weight: 700;
+        }
+
+        a {
+            color: var(--loginSubmitBackgroundColor);
+            text-decoration: none;
+        }
+
+        a:hover {
+            color: var(--loginSubmitHoverBackgroundColor);
+        }
     </style>
 </head>
 <body>
     <h1 style="top: 40%;">Select Difficulty</h1>
     <img src="{{ url_for('static', filename='images/Logo.png') }}" alt="Logo" style="width: 55%; height: auto; margin-bottom: 0px; margin-top: -26.3%;">
     
-
     <div class="grid">
         <form id="generate-form" action="/generate_sudoku" method="POST" class="form login">
             <div class="form__field">
@@ -150,7 +165,11 @@
                 <input type="submit" value="Generate Sudoku" class="form__submit">
             </div>
         </form>
+        <!-- Update the link to use Flask's url_for -->
+        <p><a href="{{ url_for('main.explanation') }}">Learn how to get into different leagues</a></p>
     </div>
+</body>
+</html>
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
@@ -160,7 +179,7 @@
                 event.preventDefault(); // Prevent the default form submission
         
                 const formData = new FormData(generateForm);
-                fetch("/generate_sudoku", {
+                fetch("/main/generate_sudoku", {
                     method: "POST",
                     body: formData
                 })

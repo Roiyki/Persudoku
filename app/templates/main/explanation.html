@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>League Criteria</title>
+    <style>
+        :root {
+            --baseColor: #606468;
+            --bodyBackgroundColor: #2c3338;
+            --bodyColor: var(--baseColor);
+            --loginInputBackgroundColor: #3b4148;
+            --loginInputHoverBackgroundColor: #434a52;
+            --loginLabelBackgroundColor: #363b41;
+            --loginBorderRadus: 0.25rem;
+            --loginSubmitBackgroundColor: #ea4c88;
+            --loginSubmitColor: #eee;
+            --loginSubmitHoverBackgroundColor: #d44179;
+            --iconFill: var(--baseColor);
+        }
+
+        body {
+            background-color: var(--bodyBackgroundColor);
+            color: var(--bodyColor);
+            font-family: "Open Sans", sans-serif;
+            font-size: 0.875rem;
+            font-weight: 400;
+            line-height: 1.5;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem;
+        }
+
+        h1 {
+            color: green;
+            font-weight: 800;
+            font-size: calc(2.1rem + 2vw);
+            margin: 0;
+        }
+
+        .content {
+            background-color: var(--loginInputBackgroundColor);
+            padding: 2rem;
+            border-radius: var(--loginBorderRadus);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+            
+        .league-section {
+            max-width: 2000px;
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 2rem;
+        }
+        
+        .league-section > div {
+            width: 30%;
+            padding: 2.5rem;
+            text-align: center;
+            background-color: #3b4148;
+            border-radius: 0.75rem;
+            margin-left: 2%;
+            margin-right: 2%;
+        }
+
+        .league-heading {
+            font-weight: bold;
+            font-size: 3rem;
+            margin-bottom: 2rem;
+            color: #1a1a1a;
+        }
+
+        .amateur p, .mediocre p, .pro p {
+            margin-top: 5rem;
+            color: #1a1a1a;
+            font-weight: bold;
+        }
+
+        a {
+            color: var(--loginSubmitBackgroundColor);
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        a:hover {
+            color: var(--loginSubmitHoverBackgroundColor);
+        }
+
+        .league-logo {
+            width: 100px;
+            height: auto;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>League Criteria</h1>
+    </div>
+
+    <div class="content">
+        <div class="league-section">
+            <div class="amateur">
+                <p class="league-heading">Amateur League</p>
+                <p>To enter the Amateur League scoreboard, you need to win 5 times at the easy level.</p>
+                <img src="static/images/leagues-bronze.png" alt="Amateur League Logo" class="league-logo">
+            </div>
+        
+            <div class="mediocre">
+                <p class="league-heading">Mediocre League</p>
+                <p>To enter the Mediocre League scoreboard, you need to win 5 times at the medium level.</p>
+                <img src="static/images/leagues-silver.png" alt="Mediocre League Logo" class="league-logo">
+            </div>
+        
+            <div class="pro">
+                <p class="league-heading">Pro League</p>
+                <p>To enter the Pro League scoreboard, you need to win 5 times at the hard level.</p>
+                <img src="static/images/leagues-gold.png" alt="Pro League Logo" class="league-logo">
+            </div>
+        </div>
+        
+        <p><a href="/index" style="color: #ea4c88;">Go back to the main page</a></p>
+    </div>
+</body>
+</html>
